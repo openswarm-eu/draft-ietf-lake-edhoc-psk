@@ -3,25 +3,22 @@ title: "EDHOC PSK authentication"
 abbrev: "TODO - Abbreviation"
 category: info
 
-docname: draft-lopez-lake-psk
+docname: draft-lopez-lake-edhoc-psk-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
 v: 3
-area: AREA
+area: Security
 workgroup: LAKE Working Group
 keyword:
- - next generation
- - unicorn
- - sparkling distributed ledger
 venue:
   group: LAKE
   type: Working Group
   mail: lake@ietf.org
   arch: https://example.com/WG
   github: ElsaLopez133/draft-lopez-lake-psk
-  latest: https://example.com/LATEST
+  latest: https://elsalopez133.github.io/draft-lopez-lake-edhoc-psk/#go.draft-lopez-lake-edhoc-psk.html
 
 author:
  -
@@ -33,11 +30,9 @@ normative:
 
 informative:
 
-
 --- abstract
 
 TODO Abstract
-
 
 --- middle
 
@@ -62,7 +57,6 @@ Lastly, EDCHO with PSK authentication can be useful in existing systems where tw
 Examples could be Generic Bootstrapping Architecture (GBA) and Authenticated Key Management Architecture (AKMA) in mobile systems, or Peer and Authenticator in EAP.
 
 ## Assumptions 
-
 
 # Conventions and Definitions 
 
