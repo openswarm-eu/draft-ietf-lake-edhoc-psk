@@ -9,19 +9,19 @@ number:
 date:
 consensus: true
 v: 3
-area: AREA
-workgroup: WG Working Group
+area: "Security"
+workgroup: "Lightweight Authenticated Key Exchange"
 keyword:
  - next generation
  - unicorn
  - sparkling distributed ledger
 venue:
-  group: WG
-  type: Working Group
-  mail: WG@example.com
-  arch: https://example.com/WG
-  github: USER/REPO
-  latest: https://example.com/LATEST
+  group: "Lightweight Authenticated Key Exchange"
+  type: "Working Group"
+  mail: "lake@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/lake/"
+  github: "ElsaLopez133/draft-lopez-lake-edhoc-psk"
+  latest: "https://ElsaLopez133.github.io/draft-lopez-lake-edhoc-psk/draft-lopez-lake-edhoc-psk.html"
 
 author:
  -
