@@ -92,7 +92,7 @@ Initiator                                                   Responder
 |<------------------------------------------------------------------+
 |                             message_2                             |
 |                                                                   |
-|                        AEAD( MAC_3, EAD_3 )                       |
+|                           AEAD( EAD_3 )                           |
 +------------------------------------------------------------------>|
 |                             message_3                             |
 |                                                                   |
@@ -124,7 +124,7 @@ Initiator                                                   Responder
 |<------------------------------------------------------------------+
 |                             message_2                             |
 |                                                                   |
-|                   Enc( ID_CRED_PSK ) AEAD( EAD_3 )                |
+|                   Enc( ID_CRED_PSK ), AEAD( EAD_3 )                |
 +------------------------------------------------------------------>|
 |                             message_3                             |
 |                                                                   |
@@ -138,30 +138,55 @@ Contrary to the variant 1, this approach provides protection against passive att
 
 # Key derivation
 
+The pseudorandom keys (PRKs) used for PSK authentication method in EDHOC are derived using EDHOC_Extract, as done in {RFC9528}.
+
+~~~~~~~~~~~~
+PRK  = EDHOC_Extract( salt, IKM )
+~~~~~~~~~~~~
+
+where the salt and input keying material (IKM) are defined for each key.
+The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in the cipher suite.
+The index of a PRK indicates its use or in what message protection operation it is used.
+
 ## Variant 1
 
-~~~~~~~~~~~~
-PRK_2e        = EDHOC_Extract( TH_2, PSK)
-~~~~~~~~~~~~
+Figure { fig-variant1key } lists the key derivations that differ from those specified in Section 4.1.2 of {RFC9528}.
 
-The rest is the same?
+~~~~~~~~~~~~
+PRK_3e2m      = EDHOC_Extract( salt3e_2m, PSK)
+PRK_4e3m      = PRK_3e2m
+MAC_2         = EDHOC_KDF( PRK_3e2m, 2, context_2, mac_length_2 )
+MAC_3         = EDHOC_KDF( PRK_4e3m, 6, context_3, mac_length_3 )
+~~~~~~~~~~~~
+{: #fig-variant1key title="Key derivation of variant 1 of EDHOC PSK authentication method." artwork-align="center"}
+
+where:
+
+- The IKM is the ephemeral-ephemeral shared secret G_XY, obtained using either G_X and Y or G_Y and X, as defined in section 6.3.1 of {RFC9053}. It provides forward secrecy, as compromise of the private authentication keys does not compromise past session keys.
+- context_2 = <<C_R, ID_CRED_PSK, TH_2, ? EAD_2>>
+- context_2 = <<ID_CRED_PSK, TH_3, ? EAD_3>>
+
+I have a question regarding the PRK... They are all equal... Shouldn't they be different, to include some randomness?
+I also understand that K_3,IV_3, KEYSTREAM_2 etc are the same since we are using the MAC_2 and MAC_3 to authenticate, and hence, the tag of the AEAD does not need to include information regarding the PSK. This is a difference with respect to variant 2
 
 ## Variant 2
 
-~~~~~~~~~~~~
-PRK_2e        = EDHOC_Extract( salt_2e )
-PRK_4e3m      = EDHOC_Extract( SALT_4e3m, ID_CRED_PSK)
+Figure { fig-variant2key } lists the key derivations that differ from those specified in Section 4.1.2 of {RFC9528}.
 
+~~~~~~~~~~~~
+PRK_2e        = EDHOC_Extract( salt_2e, G_XY )
+PRK_4e3m      = EDHOC_Extract( SALT_4e3m, PSK)
 KEYSTREAM_3   = EDHOC_KDF( PRK_2e,      TBD,  TH_3,       key_length )
 K_3           = EDHOC_KDF( PRK_3e2m,    TBD,  context_3,  key_length )
 IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  iv_length  )
 ~~~~~~~~~~~~
+{: #fig-variant2key title="Key derivation of variant 2 of EDHOC PSK authentication method." artwork-align="center"}
 
 where:
 
-- salt_2e = <<TH_2, ID_CRED_PSK>>
+- salt_2e = <<TH_2, PSK>>
 - KEYSTREAM_3 is used to encrypt the ID_CRED_PSK in message_3.
-- context_3 <<ID_CRED_PSK, TH_3>>
+- context_3 <<ID_CRED_PSK, TH_3, ? EAD_3>>
 - TH_3 = H( TH_2, PLAINTEXT_2)
 - TH_4 = H( TH_3, ID_CRED_PSK, ? EAD_3 )
 
@@ -174,7 +199,7 @@ This section specifies the differences on the message formatting compared to {RF
 ### Message 1
 
 message_1 contains the ID_CRED_PSK.
-Thus, the composition of message_1 SHALL be a CBOR sequence, as defined below:
+The composition of message_1 SHALL be a CBOR sequence, as defined below:
 
 ~~~~~~~~~~~~
 message_1 = (
@@ -204,29 +229,81 @@ The Responder SHALL process message_1 as follows:
 
 ### Message 2
 
-- The Responder uses MAC instead of Signature. Hence, COSE_Sign1 is not used.
-- The Responder computes MAC_2 as described in Section 4.1.2 of {RFC9528}, with context_2 <<C_R,ID_CRED_PSK, TH_2, ? EAD_2>>
+message_2 SHALL be a CBOR sequence, defined as:
+
+~~~~~~~~~~~~
+message_2 = (
+  G_Y_CIPHERTEXT_2 : bstr,
+)
+~~~~~~~~~~~~
+
+where:
+
+- G_Y_CIPHERTEXT_2 is the concatenation of G_Y (i.e., the ephemeral public key of the Responder) and CIPHERTEXT_2.
 - CIPHERTEXT_2 is calculated with a binary additive stream cipher, using KEYSTREAM_2 and the following plaintext:
 
-  - PLAINTEXT_2 = (C_R, ID_CRED_PSK /bstr / -24..23, MAC_2, ? EAD_2)
+  - PLAINTEXT_2 = (C_R, ID_CRED_PSK / bstr / -24..23, MAC_2, ? EAD_2)
   - CIPHERTEXT_2 = PLAINTEXT_2 XOR KEYSTREAM_2
 
+The Responder uses MAC instead of Signature. Hence, COSE_Sign1 is not used.
+The Responder computes MAC_2 as described in Section 4.1.2 of {RFC9528}, with context_2 <<C_R,ID_CRED_PSK, TH_2, ? EAD_2>>
 
 ### Message 3
 
-- The Initiator uses MAC instead of Signature. Hence, COSE_Sign1 is not used.
-- Why do we need MAC_3 if we are using AEAD? If we do need MAC_3, then MAC_3 is computed following Section 4.1.2 of {RFC9528}, with context_3 = <<ID_CRED_PSK, TH_3, ? EAD_3>>.
-- Since we are including MAC_3, should we change K_3 and IV_3 to have ID_CRED_PSK or not?
+message_3 SHALL be a CBOR sequence, defined as:
+
+~~~~~~~~~~~~
+message_3 = (
+  CIPHERTEXT_3 : bstr,
+)
+~~~~~~~~~~~~
+
+The Initiator uses MAC instead of Signature. Hence, COSE_Sign1 is not used.
+Why do we need MAC_3 if we are using AEAD? The MAC_3 is computed following Section 4.1.2 of {RFC9528}, with context_3 = <<ID_CRED_PSK, TH_3, ? EAD_3>>.
+Since we are including MAC_3, should we change K_3 and IV_3 to have ID_CRED_PSK or not?
+The Initiator computes a COSE_Encrypt0 object as defined in Section 5.2 and 5.3 of {RFC9052} with the EDHOC AEAD algorithm of the selected cipher suite and the following parameters:
+
+- K_3 and IV_3 as defined in Section 4.1.2 of {RFC9528}
+- PLAINTEXT_3 = (ID_CRED_PSK / bstr / -24..2, ? EAD_3)
+The Initiator computes TH_4 = H(TH_3, PLAINTEXT_3, ID_CRED_PSK)
+
+### Message 4
+
+message_4 SHALL be a CBOR sequence, defined as:
+
+~~~~~~~~~~~~
+message_4 = (
+  CIPHERTEXT_4 : bstr,
+)
+~~~~~~~~~~~~
+
+message_4 is optional.
 
 ## Variant 2
 
 ### Message 1
 
-Same
+Same as message_1 of EDHOC, described in Section 5.2.1 of {RFC9528}.
 
 ### Message 2
 
-- Signature_or_MAC is not used, since Enc is replaced with AEAD, so the authentication can be done using the AEAD tag.
+message_2 SHALL be a CBOR sequence, defined as:
+
+~~~~~~~~~~~~
+message_2 = (
+  G_Y_CIPHERTEXT_2 : bstr,
+)
+~~~~~~~~~~~~
+
+where:
+
+- G_Y_CIPHERTEXT_2 is the concatenation of G_Y (i.e., the ephemeral public key of the Responder) and CIPHERTEXT_2.
+- CIPHERTEXT_2 is calculated with a binary additive stream cipher, using KEYSTREAM_2 and the following plaintext:
+
+  - PLAINTEXT_2 = (C_R, ID_CRED_PSK / bstr / -24..23, MAC_2, ? EAD_2)
+  - CIPHERTEXT_2 = PLAINTEXT_2 XOR KEYSTREAM_2
+
+The Responder computes MAC_2 as described in Section 4.1.2 of {RFC9528}, with context_2 <<C_R,ID_CRED_PSK, TH_2, ? EAD_2>>
 
 ### Message 3
 
@@ -246,9 +323,25 @@ where:
 
     - PLAINTEXT_3_1 = (ID_CRED_PSK)
 
-  - CIPHERTEXT_3_2 is a COSE_Encrypt0 object as defined in Sections 5.2 and 5.3 of {RFC9528}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in Section 5.2 of {RFC9528} and the plaintext PLAINTEXT_3_2 described as follows:
+  - CIPHERTEXT_3_2 is a COSE_Encrypt0 object as defined in Sections 5.2 and 5.3 of {RFC9052}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in Section 5.2 of {RFC9528} and the plaintext PLAINTEXT_3_2 described as follows:
 
-    - PLAINTEXT_3_2 = ( ID_CRED_I / bstr / -24..23, Signature_or_MAC_3, ? EAD_3 )
+    - PLAINTEXT_3_2 = ( ID_CRED_I / bstr / -24..23, ? EAD_3 )
+
+The Initiator uses MAC instead of Signature. Hence, COSE_Sign1 is not used.
+The MAC_3 is computed following Section 4.1.2 of {RFC9528}, with context_3 = <<ID_CRED_PSK, TH_3, ? EAD_3>>.
+The Initiator computes TH_4 = H(TH_3, PLAINTEXT_3, ID_CRED_PSK)
+
+### Message 4
+
+message_4 SHALL be a CBOR sequence, defined as:
+
+~~~~~~~~~~~~
+message_4 = (
+  CIPHERTEXT_4 : bstr,
+)
+~~~~~~~~~~~~
+
+message_4 is required for authentication.
 
 # Security Considerations
 
