@@ -78,7 +78,7 @@ where:
 The purpose of ID_CRED_PSK is to facilitate the retrieval of the PSK.
 It is RECOMMENDED that it uniquely identifies the PSK as the recipient might otherwise have to try several keys.
 
-# Varaint 1
+# Variant 1
 
 In the first variant of the method the ID_CRED_PSK is sent in the clear in the first message.
 
@@ -124,12 +124,12 @@ Initiator                                                   Responder
 |<------------------------------------------------------------------+
 |                             message_2                             |
 |                                                                   |
-|                   Enc( ID_CRED_PSK ), AEAD( EAD_3 )                |
+|                   Enc( ID_CRED_PSK ), AEAD( EAD_3 )               |
 +------------------------------------------------------------------>|
 |                             message_3                             |
 |                                                                   |
 |                           AEAD( EAD_4 )                           |
-|<- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+|<------------------------------------------------------------------+
 |                             message_4                             |
 ~~~~~~~~~~~~
 {: #fig-variant2 title="Overview of message flow of Variant 2." artwork-align="center"}
