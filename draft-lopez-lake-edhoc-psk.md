@@ -135,6 +135,7 @@ Initiator                                                   Responder
 {: #fig-variant2 title="Overview of message flow of Variant 2." artwork-align="center"}
 
 Contrary to the variant 1, this approach provides protection against passive attackers for both Initiator and Responder.
+message_4 is mandatory in this case, since it is required for authentication.
 
 # Key derivation
 
