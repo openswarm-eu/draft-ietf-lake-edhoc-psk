@@ -75,6 +75,25 @@ where:
 
 - ID_CRED_PSK is a COSE header map containing header parameters that can identify a pre-shared key.
 
+~~~~~~~~~~~~
+ID_CRED_PSK = {4 : kid }
+~~~~~~~~~~~~
+
+- PSK is an RPK encoded as a CCS:
+
+~~~~~~~~~~~~
+{                                               /CCS/
+  2 : "mydotbot",                               /sub/
+  8 : {                                         /cnf/
+    1 : {                                       /COSE_Key/
+       1 : 4,                                   /kty/
+       2 : h'32',                               /kid/
+      -1 : h'50930FF462A77A3540CF546325DEA214'  /k/
+    }
+  }
+}
+~~~~~~~~~~~~
+
 The purpose of ID_CRED_PSK is to facilitate the retrieval of the PSK.
 It is RECOMMENDED that it uniquely identifies the PSK as the recipient might otherwise have to try several keys.
 
