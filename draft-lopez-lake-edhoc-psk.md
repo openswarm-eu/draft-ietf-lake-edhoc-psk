@@ -68,18 +68,18 @@ There are currently two proposed versions of the authentication method, dependin
 
 In both cases, Initiator and Responder are assumed to have a PSK with good amount of randomness and the requirements that:
 
-- Only the initiator and the Responder have access to the PSK.
-- The Responder is able to retrieve the PSK using ID_CRED_PSK.
+- Only the initiator and the Responder have access to the CRED_PSK.
+- The Responder is able to retrieve the CRED_PSK using ID_CRED_PSK.
 
 where:
 
-- ID_CRED_PSK is a COSE header map containing header parameters that can identify a pre-shared key.
+- ID_CRED_PSK is a COSE header map containing header parameters that can identify a pre-shared key. For example:
 
 ~~~~~~~~~~~~
-ID_CRED_PSK = {4 : kid }
+ID_CRED_PSK = {4 : h'lf' }
 ~~~~~~~~~~~~
 
-- PSK is an RPK encoded as a CCS:
+- CRED_PSK is an RPK encoded as a CCS. For example:
 
 ~~~~~~~~~~~~
 {                                               /CCS/
@@ -95,7 +95,9 @@ ID_CRED_PSK = {4 : kid }
 ~~~~~~~~~~~~
 
 The purpose of ID_CRED_PSK is to facilitate the retrieval of the PSK.
-It is RECOMMENDED that it uniquely identifies the PSK as the recipient might otherwise have to try several keys.
+It is RECOMMENDED that it uniquely identifies the CRED_PSK as the recipient might otherwise have to try several keys.
+If ID_CRED_PSK contains a single 'kid' parameter, then the compact encoding is applied; see Section 3.5.3.2 of {RFC9528}.
+The authentication credential CRED_PSK substitutes CRED_I and CRED_R specified in {RFC9529}, and, consequently, MUST follow the same guidelines described in Sections 3.5.2 and 3.5.3 of {RFC9528}.
 
 # Variant 1
 
@@ -120,7 +122,6 @@ Initiator                                                   Responder
 |                             message_4                             |
 ~~~~~~~~~~~~
 {: #fig-variant1 title="Overview of message flow of Variant 1." artwork-align="center"}
-
 
 This approach is similar to TLS 1.3, and, consequently, has similar privacy issues:
 
@@ -170,7 +171,7 @@ The index of a PRK indicates its use or in what message protection operation it 
 
 ## Variant 1
 
-Figure { fig-variant1key } lists the key derivations that differ from those specified in Section 4.1.2 of {RFC9528}.
+Figure [3](#fig-variant1key) lists the key derivations that differ from those specified in Section 4.1.2 of {RFC9528}.
 
 ~~~~~~~~~~~~
 PRK_3e2m      = EDHOC_Extract( salt3e_2m, PSK)
@@ -191,11 +192,10 @@ I also understand that K_3,IV_3, KEYSTREAM_2 etc are the same since we are using
 
 ## Variant 2
 
-Figure { fig-variant2key } lists the key derivations that differ from those specified in Section 4.1.2 of {RFC9528}.
+Figure [4](#fig-variant2key) lists the key derivations that differ from those specified in Section 4.1.2 of {RFC9528}.
 
 ~~~~~~~~~~~~
-PRK_2e        = EDHOC_Extract( salt_2e, G_XY )
-PRK_4e3m      = EDHOC_Extract( SALT_4e3m, PSK)
+PRK_4e3m      = EDHOC_Extract( SALT_4e3m, CRED_PSK)
 KEYSTREAM_3   = EDHOC_KDF( PRK_2e,      TBD,  TH_3,       key_length )
 K_3           = EDHOC_KDF( PRK_3e2m,    TBD,  context_3,  key_length )
 IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  iv_length  )
@@ -204,11 +204,10 @@ IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  iv_length  )
 
 where:
 
-- salt_2e = <<TH_2, PSK>>
 - KEYSTREAM_3 is used to encrypt the ID_CRED_PSK in message_3.
-- context_3 <<ID_CRED_PSK, TH_3, ? EAD_3>>
+- context_3 <<ID_CRED_PSK, TH_3, CRED_PSK, ? EAD_3>>
 - TH_3 = H( TH_2, PLAINTEXT_2)
-- TH_4 = H( TH_3, ID_CRED_PSK, ? EAD_3 )
+- TH_4 = H( TH_3, ID_CRED_PSK, ? EAD_3, CRED_PSK )
 
 # Message formatting and processing. Differences with respect to {RFC9528}
 
@@ -266,7 +265,7 @@ where:
   - CIPHERTEXT_2 = PLAINTEXT_2 XOR KEYSTREAM_2
 
 The Responder uses MAC instead of Signature. Hence, COSE_Sign1 is not used.
-The Responder computes MAC_2 as described in Section 4.1.2 of {RFC9528}, with context_2 <<C_R,ID_CRED_PSK, TH_2, ? EAD_2>>
+The Responder computes MAC_2 as described in Section 4.1.2 of {RFC9528}, with context_2 <<C_R, ID_CRED_PSK, TH_2, CRED_PSK, ? EAD_2>>
 
 ### Message 3
 
@@ -279,13 +278,13 @@ message_3 = (
 ~~~~~~~~~~~~
 
 The Initiator uses MAC instead of Signature. Hence, COSE_Sign1 is not used.
-Why do we need MAC_3 if we are using AEAD? The MAC_3 is computed following Section 4.1.2 of {RFC9528}, with context_3 = <<ID_CRED_PSK, TH_3, ? EAD_3>>.
+Why do we need MAC_3 if we are using AEAD? The MAC_3 is computed following Section 4.1.2 of {RFC9528}, with context_3 = <<ID_CRED_PSK, TH_3, CRED_PSK, ? EAD_3>>.
 Since we are including MAC_3, should we change K_3 and IV_3 to have ID_CRED_PSK or not?
 The Initiator computes a COSE_Encrypt0 object as defined in Section 5.2 and 5.3 of {RFC9052} with the EDHOC AEAD algorithm of the selected cipher suite and the following parameters:
 
 - K_3 and IV_3 as defined in Section 4.1.2 of {RFC9528}
 - PLAINTEXT_3 = (ID_CRED_PSK / bstr / -24..2, ? EAD_3)
-The Initiator computes TH_4 = H(TH_3, PLAINTEXT_3, ID_CRED_PSK)
+The Initiator computes TH_4 = H(TH_3, ID_CRED_PSK, PLAINTEXT_3, CRED_PSK)
 
 ### Message 4
 
@@ -323,7 +322,7 @@ where:
   - PLAINTEXT_2 = (C_R, ID_CRED_PSK / bstr / -24..23, MAC_2, ? EAD_2)
   - CIPHERTEXT_2 = PLAINTEXT_2 XOR KEYSTREAM_2
 
-The Responder computes MAC_2 as described in Section 4.1.2 of {RFC9528}, with context_2 <<C_R,ID_CRED_PSK, TH_2, ? EAD_2>>
+The Responder computes MAC_2 as described in Section 4.1.2 of {RFC9528}, with context_2 <<C_R, ID_CRED_PSK, TH_2, CRED_PSK, ? EAD_2>>
 
 ### Message 3
 
@@ -348,8 +347,8 @@ where:
     - PLAINTEXT_3_2 = ( ID_CRED_I / bstr / -24..23, ? EAD_3 )
 
 The Initiator uses MAC instead of Signature. Hence, COSE_Sign1 is not used.
-The MAC_3 is computed following Section 4.1.2 of {RFC9528}, with context_3 = <<ID_CRED_PSK, TH_3, ? EAD_3>>.
-The Initiator computes TH_4 = H(TH_3, PLAINTEXT_3, ID_CRED_PSK)
+The MAC_3 is computed following Section 4.1.2 of {RFC9528}, with context_3 = <<ID_CRED_PSK, TH_3, CRED_PSK, ? EAD_3>>.
+The Initiator computes TH_4 = H(TH_3, ID_CRED_PSK, PLAINTEXT_3, CRED_PSK)
 
 ### Message 4
 
@@ -361,7 +360,8 @@ message_4 = (
 )
 ~~~~~~~~~~~~
 
-message_4 is required for authentication.
+message_4 remains optional. 
+However, the Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
 
 # Security Considerations
 
