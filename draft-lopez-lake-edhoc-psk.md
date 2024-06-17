@@ -28,6 +28,10 @@ author:
 
 normative:
 
+  RFC9528:
+  RFC9529:
+  RFC9052:
+
 informative:
 
 --- abstract
