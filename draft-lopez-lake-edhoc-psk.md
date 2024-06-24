@@ -57,7 +57,7 @@ The resumption capability in Extensible Authentication Protocol (EAP) leveraging
 EAP-EDHOC resumption aims to provide a streamlined process for re-establishing secure sessions, reducing latency and resource consumption.
 By employing PSK authentication for key updates, EAP-EDHOC resumption can achieve  secure session resumption, enhancing overall efficiency and user experience.
 
-EDHOC with PSK authentication is also beneficial for existing systems where two nodes have been provided with a PSK from other parties. 
+EDHOC with PSK authentication is also beneficial for existing systems where two nodes have been provided with a PSK from other parties.
 This allows the nodes to perform ephemeral Diffie-Hellman to achieve Perfect Forward Secrecy (PFS), ensuring that past communications remain secure even if the PSK is compromised.
 The authentication provided by EDHOC prevents eavesdropping by on-path attackers, as they would need to be active participants in the communication to intercept and potentially tamper with the session.
 Examples could be Generic Bootstrapping Architecture (GBA) and Authenticated Key Management Architecture (AKMA) in mobile systems, or Peer and Authenticator in EAP.
@@ -109,7 +109,7 @@ The authentication credential CRED_PSK substitutes CRED_I and CRED_R specified i
 # Variant 1
 
 In the first variant of the method the ID_CRED_PSK is sent in the clear in the first message.
-Figure {{#fig-variant1}} shows the message flow of Variant 1.
+{{fig-variant1}} shows the message flow of Variant 1.
 
 ~~~~~~~~~~~~ aasvg
 Initiator                                                   Responder
@@ -146,7 +146,7 @@ MAC_3 is not needed, since encryption is done using AEAD.
 
 The ID_CRED_PSK is sent in message_3, encrypted using a key derived from the ephemeral shared secret, G_XY.
 In this case, the Responder will authenticate the Initiator first, contrary to Variant 1.
-Figure {{#fig-variant2}} shows the message flow of Variant 2.
+{{fig-variant2}} shows the message flow of Variant 2.
 
 ~~~~~~~~~~~~ aasvg
 Initiator                                                   Responder
@@ -185,7 +185,7 @@ The index of a PRK indicates its use or in what message protection operation it 
 
 ## Variant 1
 
-Figure {{#fig-variant1key}} lists the key derivations that differ from those specified in Section 4.1.2 of {{RFC9528}}.
+{{fig-variant1key}} lists the key derivations that differ from those specified in Section 4.1.2 of {{RFC9528}}.
 
 ~~~~~~~~~~~~
 PRK_3e2m      = EDHOC_Extract( salt3e_2m, CRED_PSK )
@@ -202,7 +202,7 @@ where:
 
 ## Variant 2
 
-Figure {{#fig-variant2key}} lists the key derivations that differ from those specified in Section 4.1.2 of {{RFC9528}}.
+{{fig-variant2key}} lists the key derivations that differ from those specified in Section 4.1.2 of {{RFC9528}}.
 
 ~~~~~~~~~~~~
 PRK_4e3m      = EDHOC_Extract( SALT_4e3m, CRED_PSK )
