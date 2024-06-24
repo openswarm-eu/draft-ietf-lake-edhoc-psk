@@ -163,7 +163,7 @@ Initiator                                                   Responder
 |                             message_3                             |
 |                                                                   |
 |                           AEAD( EAD_4 )                           |
-|<- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+|<------------------------------------------------------------------+
 |                             message_4                             |
 ~~~~~~~~~~~~
 {: #fig-variant2 title="Overview of message flow of Variant 2." artwork-align="center"}
@@ -191,7 +191,8 @@ The index of a PRK indicates its use or in what message protection operation it 
 PRK_3e2m      = EDHOC_Extract( salt3e_2m, CRED_PSK )
 PRK_4e3m      = PRK_3e2m
 MAC_2         = EDHOC_KDF( PRK_3e2m, 2, context_2, mac_length_2 )
-MAC_3         = EDHOC_KDF( PRK_4e3m, 6, context_3, mac_length_3 )
+K_3           = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  key_length )
+IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  iv_length  )
 ~~~~~~~~~~~~
 {: #fig-variant1key title="Key derivation of variant 1 of EDHOC PSK authentication method." artwork-align="center"}
 
@@ -349,12 +350,14 @@ where:
 
     - PLAINTEXT_3A = ( ID_CRED_PSK )
 
-  - CIPHERTEXT_3B is a COSE_Encrypt0 object as defined in Sections 5.2 and 5.3 of {{RFC9052}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in Section 5.2 of {{RFC9528}} and the plaintext PLAINTEXT_3B described as follows:
+  - CIPHERTEXT_3B is a COSE_Encrypt0 object as defined in Sections 5.2 and 5.3 of {{RFC9052}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in Section 5.2 of {{RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
+    - protected = h''
+    - external_aad = context_3
+    - K_3 and IV_3 are defined in Section 5.2
     - PLAINTEXT_3B = ( ? EAD_3 )
 
-Since encryption is done using AEAD, MAC_3 is not needed.
-The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3, CRED_PSK )
+The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3, CRED_PSK ), defined in Section 5.2.
 
 ### Message 4
 
@@ -366,8 +369,8 @@ message_4 = (
 )
 ~~~~~~~~~~~~
 
-message_4 remains optional.
-However, the Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
+A fourth message is mandatory.
+The Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
 
 # Security Considerations
 
