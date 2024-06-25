@@ -453,6 +453,7 @@ Mutual authentication is achieved at earlier stages in Variant 1, which might be
 | Completeness | Complete with optional message_4 | Complete with optional message_4 |
 |---|---|---|
 | Suitability for Quick Identification Scenarios | Higher | Lower |
+{: #comparison-table title="Comparison between Variant 1 and Variant 2." cols="r l l"}
 
 # Privacy Considerations
 
