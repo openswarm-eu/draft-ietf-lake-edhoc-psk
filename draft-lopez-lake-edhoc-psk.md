@@ -86,7 +86,7 @@ where:
 ID_CRED_PSK = {4 : h'lf' }
 ~~~~~~~~~~~~
 
-- CRED_PSK is a COSE_Key compatible credential, encoded as a CCS or CWT. For example: 
+- CRED_PSK is a COSE_Key compatible credential, encoded as a CCS or CWT. For example:
 
 ~~~~~~~~~~~~
 {                                               /CCS/
@@ -133,14 +133,19 @@ Initiator                                                   Responder
 
 This approach is similar to TLS 1.3, and, consequently, has similar privacy issues. For example:
 
-- **Identity Leakage**: neither the identity of the Initiator nor the Responder are protected against active or passive attackers. By sending the ID_CRED_PSK in the clear, the initiator reveals its identity to any eavesdropper on the network. This allows passive observers to learn which client is attempting to connect to the server.
-- **Tracking and correlation**: An attacker can use the plaintext ID_CRED_PSK to track the client across multiple connections, even if those connections are made from different networks or at different times. This enables long-term tracking of clients.
-- **Information leakage about relationships**: The ID_CRED_PSK also reveals information about the relationship between the client and the server. An observer can infer that the two parties have a pre-existing relationship and have previously agreed on a shared secret.
-- **Replay and preplay attacks**: ID_CRED_PSK can facilitate replay attacks. An attacker might use the observed ID_CRED_PSK to initiate their own connection attempts, potentially leading to denial-of-service or other attacks.
+- **Identity Leakage**: neither the identity of the Initiator nor the Responder are protected against active or passive attackers.
+By sending the ID_CRED_PSK in the clear, the initiator reveals its identity to any eavesdropper on the network.
+This allows passive observers to learn which client is attempting to connect to the server.
+- **Tracking and correlation**: An attacker can use the plaintext ID_CRED_PSK to track the client across multiple connections, even if those connections are made from different networks or at different times.
+This enables long-term tracking of clients.
+- **Information leakage about relationships**: ID_CRED_PSK also reveals information about the relationship between the client and the server.
+An observer can infer that the two parties have a pre-existing relationship and have previously agreed on a shared secret.
+- **Replay and preplay attacks**: ID_CRED_PSK can facilitate replay attacks.
+An attacker might use the observed ID_CRED_PSK to initiate their own connection attempts, potentially leading to denial-of-service or other attacks.
 - **Downgrade attacks**: If multiple PSKs are available (e.g., of varying strengths or for different purposes), an attacker might attempt to force the use of a weaker or less privacy-preserving PSK by manipulating the ID_CRED_PSK field.
 
 This variant incurs minimal modifications with respect to the current methods described in {{RFC9528}} and the fourth message remains optional.
-MAC_3 is not needed, since encryption is done using AEAD.
+MAC_3 is removed in message_3 and replaced by AEAD.
 
 ## Variant 2
 
@@ -168,7 +173,7 @@ Initiator                                                   Responder
 ~~~~~~~~~~~~
 {: #fig-variant2 title="Overview of message flow of Variant 2." artwork-align="center"}
 
-Contrary to the Variant 1, this approach provides protection against passive attackers for both Initiator and Responder.
+Contrary to Variant 1, this approach provides protection against passive attackers for both Initiator and Responder.
 message_4 remains optional, but is needed to achieve mutual authentication if not relaying on external applications, such as OSCORE.
 
 # Key derivation
@@ -181,7 +186,6 @@ PRK  = EDHOC_Extract( salt, IKM )
 
 where the salt and input keying material (IKM) are defined for each key.
 The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in the cipher suite.
-The index of a PRK indicates its use or in what message protection operation it is used.
 
 ## Variant 1
 
@@ -292,6 +296,7 @@ The Initiator computes a COSE_Encrypt0 object as defined in Section 5.2 and 5.3 
 
 - K_3 and IV_3 as defined in Section 4.1.2 of {{RFC9528}}
 - PLAINTEXT_3 = ( ID_CRED_PSK / bstr / -24..2, ? EAD_3 )
+
 The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3, CRED_PSK )
 
 ### Message 4
@@ -330,7 +335,7 @@ where:
   - PLAINTEXT_2 = ( C_R, / bstr / -24..23, ? EAD_2 )
   - CIPHERTEXT_2 = PLAINTEXT_2 XOR KEYSTREAM_2
 
-Contrary to {{RFC9528}}, MAC_2 is not needed.
+Contrary to {{RFC9528}} and Variant 1, MAC_2 is not needed.
 
 ### Message 3
 
@@ -353,7 +358,7 @@ where:
   - CIPHERTEXT_3B is a COSE_Encrypt0 object as defined in Sections 5.2 and 5.3 of {{RFC9052}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in Section 5.2 of {{RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
     - protected = h''
-    - external_aad = context_3
+    - external_aad = context_3, defined in Section 5.2
     - K_3 and IV_3 are defined in Section 5.2
     - PLAINTEXT_3B = ( ? EAD_3 )
 
@@ -374,11 +379,7 @@ The Initiator MUST NOT persistently store PRK_out or application keys until the 
 
 # Security Considerations
 
-TODO Security
-
-# Privacy Considerations
-
-When evaluating the privacy considerations, it is important to differentiate between the initial handshake and session resumption phases.
+When evaluating the security considerations, it is important to differentiate between the initial handshake and session resumption phases.
 
   1. **Initial Handshake**: a fresh CRED_PSK is used to establish a secure connection.
   2. **Session Resumption**: the same PSK identifier (ID_CRED_PSK) is reused each time EDHOC is executed.
@@ -406,6 +407,54 @@ The PSK authentication method might require a compulsory message depending on wh
 
 In both variants, the Initiator and Responder can send information in EAD_3 and EAD_4 or in OSCORE messages in parallel with message_3 and message_4.
 This is possible because the Initiator knows that only the entity with access to the CRED_PSK can decrypt the information.
+
+## Optimization
+
+1. **Variant 1**: ID_CRED_PSK is sent without encryption, saving computational resources at the cost of privacy. In addition, the exposure of ID_CRED_PSK in message_1 allows for earlier key derivation on the responder's side, potentially speeding up the process.
+2. **Variant 2**: Requires encryption of ID_CRED_PSK in message_3, which implies higher computational cost.
+
+## Mutual Authentication
+
+Mutual authentication is achieved at earlier stages in Variant 1, which might be important in certain applications, as well as increasing security against attacks such as DoS or oracle attacks.
+
+## Attacks
+
+1. **Variant 1**: It is more vulnerable to passive monitoring and traffic analysis due to the exposed ID_CRED_PSK.
+2. **Variant 2**:
+
+## Comparison
+
+| Aspect | Variant 1 (Clear ID_CRED_PSK) | Variant 2 (Encrypted ID_CRED_PSK) |
+|--------|-----------------------------------|--------------------------------------|
+| Privacy | Lower: ID_CRED_PSK sent in clear in message_1 | Higher: ID_CRED_PSK encrypted in message_3 |
+|---|---|---|
+| Initiator Identity Protection | Exposed from message_1 | Protected until message_3 |
+|---|---|---|
+| Authentication Timing | Earlier, possible from message_1 | Delayed until message_3 |
+|---|---|---|
+| Computational Efficiency | Slightly higher (no encryption of ID_CRED_PSK) | Slightly lower (encryption of ID_CRED_PSK) |
+|---|---|---|
+| Resistance to Passive Attacks | Lower due to exposed identity | Higher due to identity protection |
+|---|---|---|
+| Early Access Control | Possible from message_1 | Limited, delayed until message_3 |
+|---|---|---|
+| DoS Attack Vulnerability | Lower due to early authentication | Potentially higher due to delayed authentication |
+|---|---|---|
+| Resource Allocation | Fewer resources allocated before authentication | More resources allocated before authentication |
+|---|---|---|
+| Compatibility with Systems Expecting Early ID | Higher | Lower |
+|---|---|---|
+| Flexibility for Identity Protection | Lower | Higher |
+|---|---|---|
+| Key Derivation Timing | Potentially earlier | Potentially delayed |
+|---|---|---|
+| Message Structure | ID_CRED_PSK in message_1, MAC_2 in encrypted part of message_2 | ID_CRED_PSK in message_3 |
+|---|---|---|
+| Completeness | Complete with optional message_4 | Complete with optional message_4 |
+|---|---|---|
+| Suitability for Quick Identification Scenarios | Higher | Lower |
+
+# Privacy Considerations
 
 # Unified Approach and Recommendations
 
