@@ -131,6 +131,8 @@ Initiator                                                   Responder
 ~~~~~~~~~~~~
 {: #fig-variant1 title="Overview of message flow of Variant 1." artwork-align="center"}
 
+This variant incurs minimal modifications with respect to the current methods described in {{RFC9528}} and the fourth message remains optional.
+MAC_3 is removed in message_3 and replaced by AEAD.
 This approach is similar to TLS 1.3, and, consequently, has similar privacy issues. For example:
 
 - **Identity Leakage**: neither the identity of the Initiator nor the Responder are protected against active or passive attackers.
@@ -143,9 +145,6 @@ An observer can infer that the two parties have a pre-existing relationship and 
 - **Replay and preplay attacks**: ID_CRED_PSK can facilitate replay attacks.
 An attacker might use the observed ID_CRED_PSK to initiate their own connection attempts, potentially leading to denial-of-service or other attacks.
 - **Downgrade attacks**: If multiple PSKs are available (e.g., of varying strengths or for different purposes), an attacker might attempt to force the use of a weaker or less privacy-preserving PSK by manipulating the ID_CRED_PSK field.
-
-This variant incurs minimal modifications with respect to the current methods described in {{RFC9528}} and the fourth message remains optional.
-MAC_3 is removed in message_3 and replaced by AEAD.
 
 ## Variant 2
 
@@ -194,9 +193,9 @@ The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in 
 ~~~~~~~~~~~~
 PRK_3e2m      = EDHOC_Extract( salt3e_2m, CRED_PSK )
 PRK_4e3m      = PRK_3e2m
-MAC_2         = EDHOC_KDF( PRK_3e2m, 2, context_2, mac_length_2 )
-K_3           = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  key_length )
-IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  iv_length  )
+MAC_2         = EDHOC_KDF( PRK_3e2m,      2,  context_2,  mac_length_2 )
+K_3           = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  key_length   )
+IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  iv_length    )
 ~~~~~~~~~~~~
 {: #fig-variant1key title="Key derivation of variant 1 of EDHOC PSK authentication method." artwork-align="center"}
 
@@ -359,7 +358,7 @@ where:
 
     - protected = h''
     - external_aad = context_3, defined in Section 5.2
-    - K_3 and IV_3 are defined in Section 5.2
+    - K_3 and IV_3 as defined in Section 5.2
     - PLAINTEXT_3B = ( ? EAD_3 )
 
 The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3, CRED_PSK ), defined in Section 5.2.
@@ -383,7 +382,7 @@ When evaluating the security considerations, it is important to differentiate be
 
   1. **Initial Handshake**: a fresh CRED_PSK is used to establish a secure connection.
   2. **Session Resumption**: the same PSK identifier (ID_CRED_PSK) is reused each time EDHOC is executed.
-    While this reuses enhances efficiency and reduces the overhead of key exchanges, it presents privacy risks if not managed properly.
+    While this enhances efficiency and reduces the overhead of key exchanges, it presents privacy risks if not managed properly.
     Over multiple resumption sessions, initiating a full EDHOC session changes the resumption PSK, resulting in a new ID_CRED_PSK.
     The periodic renewal of the CRED_PSK and ID_CRED_PSK helps mitigate long-term privacy risks associated with static key identifiers.
 
@@ -393,7 +392,7 @@ The current EDHOC methods protect the Initiator’s identity against active atta
 However, there are differences between the two variants described in this draft:
 
   1. **Variant 1**: neither the Initiator's identity nor the Responder's identity are protected against active or passive attackers.
-  2. **Variant 2**: bot the Initiator's and Responder's identities are protected against passive attackers.
+  2. **Variant 2**: both the Initiator's and Responder's identities are protected against passive attackers.
 
 ## Number of messages
 
@@ -410,17 +409,18 @@ This is possible because the Initiator knows that only the entity with access to
 
 ## Optimization
 
-1. **Variant 1**: ID_CRED_PSK is sent without encryption, saving computational resources at the cost of privacy. In addition, the exposure of ID_CRED_PSK in message_1 allows for earlier key derivation on the responder's side, potentially speeding up the process.
-2. **Variant 2**: Requires encryption of ID_CRED_PSK in message_3, which implies higher computational cost.
+1. **Variant 1**: ID_CRED_PSK is sent without encryption, saving computational resources at the cost of privacy.
+The exposure of ID_CRED_PSK in message_1 allows for earlier key derivation on the responder's side, potentially speeding up the process.
+2. **Variant 2**: It requires encryption of ID_CRED_PSK in message_3, which implies higher computational cost.
 
 ## Mutual Authentication
 
-Mutual authentication is achieved at earlier stages in Variant 1, which might be important in certain applications, as well as increasing security against attacks such as DoS or oracle attacks.
+Mutual authentication is achieved at earlier stages in Variant 1, which might be important in certain applications, as well as increasing security against Denial of Service attacks or oracle attacks.
 
 ## Attacks
 
-1. **Variant 1**: It is more vulnerable to passive monitoring and traffic analysis due to the exposed ID_CRED_PSK.
-2. **Variant 2**:
+1. **Variant 1**: it allows for earlier authentication, potentially improving resistance to some active attacks, but at the cost of reduced privacy and increased vulnerability to passive attacks and traffic analysis.-
+2. **Variant 2**: it  offers better privacy and resistance to passive attacks but might be more vulnerable to certain active attacks due to delayed authentication.
 
 ## Comparison
 
@@ -448,8 +448,6 @@ Mutual authentication is achieved at earlier stages in Variant 1, which might be
 |---|---|---|
 | Key Derivation Timing | Potentially earlier | Potentially delayed |
 |---|---|---|
-| Message Structure | ID_CRED_PSK in message_1, MAC_2 in encrypted part of message_2 | ID_CRED_PSK in message_3 |
-|---|---|---|
 | Completeness | Complete with optional message_4 | Complete with optional message_4 |
 |---|---|---|
 | Suitability for Quick Identification Scenarios | Higher | Lower |
@@ -466,6 +464,7 @@ For use cases involving the transmission of application data, application data c
 In scenarios such as EAP-EDHOC, where application data is not sent, message_4 is mandatory.
 Other implementations may continue using OSCORE in place of EDHOC message_4, with a required change in the protocol's language to:
       The Initiator SHALL NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message.
+
 This change ensures that key materials are only stored once their integrity and authenticity are confirmed, thereby enhancing privacy by preventing early storage of potentially compromised keys.
 
 Lastly, whether the Initiator or Responder authenticates first is not relevant when using symmetric keys.
