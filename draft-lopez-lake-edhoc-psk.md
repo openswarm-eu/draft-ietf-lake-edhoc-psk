@@ -45,11 +45,11 @@ TODO Abstract
 ## Motivation
 
 Pre-shared key (PSK) authentication method provides a balance between security and computational efficiency.
-This authentication method was proposed in the first drafts of Ephemeral Diffie-Hellman Over COSE (EDHOC), and was ruled out to speed out the development process.
+This authentication method was proposed in the first I-Ds of Ephemeral Diffie-Hellman Over COSE (EDHOC) {{RFC9528}}, and was ruled out to speed out the development process.
 However, there is now a renewed effort to reintroduce PSK authentication, making this draft an update to the {{RFC9528}}.
 
-One prominent use case of PSK authentication in the EDHOC protocol is the update of session keys.
-This method aims to reduce the computational cost that comes with re-running the protocol with public authentication keys.
+One prominent use case of PSK authentication in the EDHOC protocol is session resumption.
+This allows previously connected parties to quickly reestablish secure communication using pre-shared keys from their earlier session, reducing the overhead of full key exchange.
 This efficiency is beneficial in scenarios where frequent key updates are needed, such in resource-constrained environments or applications requiring high-frequency secure communications.
 The use of PSK authentication in EDHOC ensures that session key can be refreshed without heavy computational overhead, typically associated with public key operations, thus optimizing both performance and security.
 
@@ -57,7 +57,7 @@ The resumption capability in Extensible Authentication Protocol (EAP) leveraging
 EAP-EDHOC resumption aims to provide a streamlined process for re-establishing secure sessions, reducing latency and resource consumption.
 By employing PSK authentication for key updates, EAP-EDHOC resumption can achieve  secure session resumption, enhancing overall efficiency and user experience.
 
-EDHOC with PSK authentication is also beneficial for existing systems where two nodes have been provided with a PSK from other parties.
+EDHOC with PSK authentication is also beneficial for existing systems where two nodes have been provided with a PSK from other parties out of band.
 This allows the nodes to perform ephemeral Diffie-Hellman to achieve Perfect Forward Secrecy (PFS), ensuring that past communications remain secure even if the PSK is compromised.
 The authentication provided by EDHOC prevents eavesdropping by on-path attackers, as they would need to be active participants in the communication to intercept and potentially tamper with the session.
 Examples could be Generic Bootstrapping Architecture (GBA) and Authenticated Key Management Architecture (AKMA) in mobile systems, or Peer and Authenticator in EAP.
@@ -106,7 +106,7 @@ It is RECOMMENDED that it uniquely identifies the CRED_PSK as the recipient migh
 If ID_CRED_PSK contains a single 'kid' parameter, then the compact encoding is applied; see Section 3.5.3.2 of {{RFC9528}}.
 The authentication credential CRED_PSK substitutes CRED_I and CRED_R specified in {{RFC9529}}, and, when applicable, MUST follow the same guidelines described in Sections 3.5.2 and 3.5.3 of {{RFC9528}}.
 
-# Variant 1
+## Variant 1
 
 In the first variant of the method the ID_CRED_PSK is sent in the clear in the first message.
 {{fig-variant1}} shows the message flow of Variant 1.
@@ -133,6 +133,8 @@ Initiator                                                   Responder
 
 This variant incurs minimal modifications with respect to the current methods described in {{RFC9528}} and the fourth message remains optional.
 MAC_3 is removed in message_3 and replaced by AEAD.
+
+Not sure this should go here. Probably not.
 This approach is similar to TLS 1.3, and, consequently, has similar privacy issues. For example:
 
 - **Identity Leakage**: neither the identity of the Initiator nor the Responder are protected against active or passive attackers.
@@ -173,7 +175,7 @@ Initiator                                                   Responder
 {: #fig-variant2 title="Overview of message flow of Variant 2." artwork-align="center"}
 
 Contrary to Variant 1, this approach provides protection against passive attackers for both Initiator and Responder.
-message_4 remains optional, but is needed to achieve mutual authentication if not relaying on external applications, such as OSCORE.
+message_4 remains optional, but is needed to to authenticate the Responder and achieve mutual authentication in EDHOC if not relaying on external applications, such as OSCORE.
 
 # Key derivation
 
@@ -194,33 +196,32 @@ The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in 
 PRK_3e2m      = EDHOC_Extract( salt3e_2m, CRED_PSK )
 PRK_4e3m      = PRK_3e2m
 MAC_2         = EDHOC_KDF( PRK_3e2m,      2,  context_2,  mac_length_2 )
-K_3           = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  key_length   )
-IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  iv_length    )
+K_3           = EDHOC_KDF( PRK_4e3m,    TBD,  TH_3,       key_length   )
+IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  TH_3,       iv_length    )
 ~~~~~~~~~~~~
 {: #fig-variant1key title="Key derivation of variant 1 of EDHOC PSK authentication method." artwork-align="center"}
 
 where:
 
 - context_2 = <<C_R, ID_CRED_PSK, TH_2, CRED_PSK, ? EAD_2>>
-- context_3 = <<ID_CRED_PSK, TH_3, CRED_PSK, ? EAD_3>>
 
 ## Variant 2
 
 {{fig-variant2key}} lists the key derivations that differ from those specified in Section 4.1.2 of {{RFC9528}}.
 
 ~~~~~~~~~~~~
+PRK_3e2m      = PRK_2e
 PRK_4e3m      = EDHOC_Extract( SALT_4e3m, CRED_PSK )
 KEYSTREAM_3   = EDHOC_KDF( PRK_3e2m,    TBD,  TH_3,       key_length )
-K_3           = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  key_length )
-IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  context_3,  iv_length  )
+K_3           = EDHOC_KDF( PRK_4e3m,    TBD,  TH_3,  key_length )
+IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  TH_3,  iv_length  )
 ~~~~~~~~~~~~
 {: #fig-variant2key title="Key derivation of variant 2 of EDHOC PSK authentication method." artwork-align="center"}
 
 where:
 
 - KEYSTREAM_3 is used to encrypt the ID_CRED_PSK in message_3.
-- context_3 <<ID_CRED_PSK, TH_3, CRED_PSK, ? EAD_3>>
-- TH_3 = H( TH_2, PLAINTEXT_2)
+- TH_3 = H( TH_2, PLAINTEXT_2, CRED_PSK )
 - TH_4 = H( TH_3, ID_CRED_PSK, ? EAD_3, CRED_PSK )
 
 # Message formatting and processing. Differences with respect to {{RFC9528}}
@@ -357,7 +358,7 @@ where:
   - CIPHERTEXT_3B is a COSE_Encrypt0 object as defined in Sections 5.2 and 5.3 of {{RFC9052}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in Section 5.2 of {{RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
     - protected = h''
-    - external_aad = context_3, defined in Section 5.2
+    - external_aad = << Enc(ID_CRED_PSK), TH_3 >>
     - K_3 and IV_3 as defined in Section 5.2
     - PLAINTEXT_3B = ( ? EAD_3 )
 
@@ -373,7 +374,7 @@ message_4 = (
 )
 ~~~~~~~~~~~~
 
-A fourth message is mandatory.
+A fourth message is mandatory for Responder's authentication.
 The Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
 
 # Security Considerations
@@ -388,7 +389,7 @@ When evaluating the security considerations, it is important to differentiate be
 
 ## Identity protection
 
-The current EDHOC methods protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers.
+The current EDHOC methods protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See Section 9.1 of {{RFC9528}}).
 However, there are differences between the two variants described in this draft:
 
   1. **Variant 1**: neither the Initiator's identity nor the Responder's identity are protected against active or passive attackers.
@@ -400,12 +401,12 @@ The current EDHOC protocol consists of three mandatory messages and an optional 
 The PSK authentication method might require a compulsory message depending on which variant is employed:
 
   1. **Variant 1**: message_4 is optional since both identities are authenticated after message_3.
-  2. **Variant 2**: message_4 remains optional, but mutual authentication is not guaranteed without it, or an OSCORE message.
+  2. **Variant 2**: message_4 remains optional, but mutual authentication is not guaranteed without it, or an OSCORE message or any application data that confirms that the Responder owns the PSK.
 
 ## External Authorization Data
 
 In both variants, the Initiator and Responder can send information in EAD_3 and EAD_4 or in OSCORE messages in parallel with message_3 and message_4.
-This is possible because the Initiator knows that only the entity with access to the CRED_PSK can decrypt the information.
+This is possible because the Initiator knows that only the Responder with access to the CRED_PSK can decrypt the information.
 
 ## Optimization
 
@@ -461,7 +462,7 @@ To improve privacy during both initial handshake and session resumption, a singl
 Variant 2 is particularly suitable for this purpose as it streamlines key management and usage across different phases.
 
 For use cases involving the transmission of application data, application data can be sent concurrently with message_3, maintaining the protocol's efficiency.
-In scenarios such as EAP-EDHOC, where application data is not sent, message_4 is mandatory.
+In applications such as EAP-EDHOC, where application data is not sent, message_4 is mandatory.
 Other implementations may continue using OSCORE in place of EDHOC message_4, with a required change in the protocol's language to:
       The Initiator SHALL NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message.
 
