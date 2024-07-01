@@ -73,7 +73,9 @@ Examples could be Generic Bootstrapping Architecture (GBA) and Authenticated Key
 There are currently two proposed versions of the authentication method, depending on where the pre-shared key identifier (ID_CRED_PSK) is sent.
 ID_CRED_PSK allows retrieval of CRED_PSK, a COSE object that contains the PSK.
 
-In both cases, Initiator and Responder are assumed to have a PSK with good amount of randomness and the requirements that:
+## Credentials
+
+In both varaints, Initiator and Responder are assumed to have a PSK with good amount of randomness and the requirements that:
 
 - Only the Initiator and the Responder have access to the PSK.
 - The Responder is able to retrieve the PSK using ID_CRED_PSK.
