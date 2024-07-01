@@ -139,10 +139,10 @@ This approach is similar to TLS 1.3, and, consequently, has similar privacy issu
 
 - **Identity Leakage**: neither the identity of the Initiator nor the Responder are protected against active or passive attackers.
 By sending the ID_CRED_PSK in the clear, the initiator reveals its identity to any eavesdropper on the network.
-This allows passive observers to learn which client is attempting to connect to the server.
-- **Tracking and correlation**: An attacker can use the plaintext ID_CRED_PSK to track the client across multiple connections, even if those connections are made from different networks or at different times.
-This enables long-term tracking of clients.
-- **Information leakage about relationships**: ID_CRED_PSK also reveals information about the relationship between the client and the server.
+This allows passive observers to learn which entity is attempting to connect to the server.
+- **Tracking and correlation**: An attacker can use the plaintext ID_CRED_PSK to track the entity across multiple connections, even if those connections are made from different networks or at different times.
+This enables long-term tracking of entities.
+- **Information leakage about relationships**: ID_CRED_PSK also reveals information about the relationship between the Initiator and the Responder.
 An observer can infer that the two parties have a pre-existing relationship and have previously agreed on a shared secret.
 - **Replay and preplay attacks**: ID_CRED_PSK can facilitate replay attacks.
 An attacker might use the observed ID_CRED_PSK to initiate their own connection attempts, potentially leading to denial-of-service or other attacks.
@@ -204,6 +204,7 @@ IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  TH_3,       iv_length    )
 where:
 
 - context_2 = <<C_R, ID_CRED_PSK, TH_2, CRED_PSK, ? EAD_2>>
+- TH_3 = H( TH_2, PLAINTEXT_2, CRED_PSK )
 
 ## Variant 2
 
@@ -294,10 +295,12 @@ message_3 = (
 
 The Initiator computes a COSE_Encrypt0 object as defined in Section 5.2 and 5.3 of {{RFC9052}} with the EDHOC AEAD algorithm of the selected cipher suite and the following parameters:
 
-- K_3 and IV_3 as defined in Section 4.1.2 of {{RFC9528}}
-- PLAINTEXT_3 = ( ID_CRED_PSK / bstr / -24..2, ? EAD_3 )
+- protected = h''
+- external_aad = TH_3, as defined in Section 5.2
+- K_3 and IV_3 as defined in Section 5.2
+- PLAINTEXT_3 = ( ? EAD_3 )
 
-The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3, CRED_PSK )
+The Initiator computes TH_4 = H( TH_3, PLAINTEXT_3, CRED_PSK )
 
 ### Message 4
 
@@ -443,7 +446,7 @@ Mutual authentication is achieved at earlier stages in Variant 1, which might be
 |---|---|---|
 | Resource Allocation | Fewer resources allocated before authentication | More resources allocated before authentication |
 |---|---|---|
-| Compatibility with Systems Expecting Early ID | Higher | Lower |
+| Compatibility with Systems Expecting Early Identification | Higher | Lower |
 |---|---|---|
 | Flexibility for Identity Protection | Lower | Higher |
 |---|---|---|
