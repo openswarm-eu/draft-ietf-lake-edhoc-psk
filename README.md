@@ -1,6 +1,6 @@
-# TODO - Your title
+# EDHOC PSK authentication
 
-This is the working area for the individual Internet-Draft, "TODO - Your title".
+This is the working area for the individual Internet-Draft, "EDHOC PSK authentication".
 
 * [Editor's Copy](https://ElsaLopez133.github.io/draft-lopez-lake-edhoc-psk/#go.draft-lopez-lake-edhoc-psk.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-lopez-lake-edhoc-psk)

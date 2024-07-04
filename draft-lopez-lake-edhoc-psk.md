@@ -25,6 +25,18 @@ author:
     fullname: Elsa Lopez Perez
     organization: Inria
     email: elsa.lopez-perez@inria.fr
+ -
+    fullname: Göran Selander
+    organization: Ericsson
+    email: goran.selander@ericsson.com
+ -
+    fullname: John Preuß Mattsson
+    organization: Ericsson
+    email: john.mattsson@ericsson.com
+ -
+    fullname: Rafael Lopez Marin
+    organization: University of Murcia
+    email: rafa@um.es
 
 normative:
 
@@ -36,7 +48,7 @@ informative:
 
 --- abstract
 
-TODO Abstract
+This document specifies two variants of pre-shared key (PSK) authentication for the Ephemeral Diffie-Hellman Over COSE (EDHOC) key exchange protocol. Both variants use a pre-shared key for authentication, but differ in when the PSK credential identifier (ID_CRED_PSK) is transmitted. In the first variant, ID_CRED_PSK is sent in message 1, while in the second variant, it is sent in message 3. This document describes the authentication processes, message flows, and security considerations for each variant.
 
 --- middle
 
