@@ -22,7 +22,7 @@ venue:
 
 author:
  -
-    fullname: Elsa Lopez Perez
+    fullname: Elsa Lopez-Perez
     organization: Inria
     email: elsa.lopez-perez@inria.fr
  -
@@ -34,7 +34,7 @@ author:
     organization: Ericsson
     email: john.mattsson@ericsson.com
  -
-    fullname: Rafael Lopez Marin
+    fullname: Rafael Marin-Lopez
     organization: University of Murcia
     email: rafa@um.es
 
