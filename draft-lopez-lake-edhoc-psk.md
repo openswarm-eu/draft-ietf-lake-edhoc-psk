@@ -48,7 +48,7 @@ informative:
 
 --- abstract
 
-This document specifies the Pre-Shared Key (PSK) authentication method for the Ephemeral Diffie-Hellman Over COSE (EDHOC) key exchange protocol. Initially there were two proposed versions and after an in depth study of both (PSK1 and PSK2), the working group decided to move on forward with PSK2, which we will refer to as EDHOC-PSK. This document describes the authentication processes, message flows, and security considerations of this authentication method.
+This document specifies the Pre-Shared Key (PSK) authentication method for the Ephemeral Diffie-Hellman Over COSE (EDHOC) key exchange protocol. It describes the authentication processes, message flows, and security considerations of this authentication method.
 
 --- middle
 
@@ -60,19 +60,17 @@ Pre-shared key (PSK) authentication method provides a balance between security a
 This authentication method was proposed in the first I-Ds of Ephemeral Diffie-Hellman Over COSE (EDHOC) {{RFC9528}}, and was ruled out to speed out the development process.
 However, there is now a renewed effort to reintroduce PSK authentication, making this draft an update to the {{RFC9528}}.
 
-One prominent use case of PSK authentication in the EDHOC protocol is session resumption.
+EDHOC with PSK authentication could be beneficial for existing systems where two nodes have been provided with a PSK from other parties out of band.
+This allows the nodes to perform ephemeral Diffie-Hellman to achieve Perfect Forward Secrecy (PFS), ensuring that past communications remain secure even if the PSK is compromised.
+The authentication provided by EDHOC prevents eavesdropping by on-path attackers, as they would need to be active participants in the communication to intercept and potentially tamper with the session.
+Examples could be Generic Bootstrapping Architecture (GBA) and Authenticated Key Management Architecture (AKMA) in mobile systems, or Peer and Authenticator in EAP.
+
+Another prominent use case of PSK authentication in the EDHOC protocol is session resumption.
 This allows previously connected parties to quickly reestablish secure communication using pre-shared keys from their earlier session, reducing the overhead of full key exchange.
 This efficiency is beneficial in scenarios where frequent key updates are needed, such in resource-constrained environments or applications requiring high-frequency secure communications.
 The use of PSK authentication in EDHOC ensures that session key can be refreshed without heavy computational overhead, typically associated with public key operations, thus optimizing both performance and security.
 
-The resumption capability in Extensible Authentication Protocol (EAP) leveraging EDHOC can benefit from this method.
-EAP-EDHOC resumption aims to provide a streamlined process for re-establishing secure sessions, reducing latency and resource consumption.
-By employing PSK authentication for key updates, EAP-EDHOC resumption can achieve  secure session resumption, enhancing overall efficiency and user experience.
 
-EDHOC with PSK authentication is also beneficial for existing systems where two nodes have been provided with a PSK from other parties out of band.
-This allows the nodes to perform ephemeral Diffie-Hellman to achieve Perfect Forward Secrecy (PFS), ensuring that past communications remain secure even if the PSK is compromised.
-The authentication provided by EDHOC prevents eavesdropping by on-path attackers, as they would need to be active participants in the communication to intercept and potentially tamper with the session.
-Examples could be Generic Bootstrapping Architecture (GBA) and Authenticated Key Management Architecture (AKMA) in mobile systems, or Peer and Authenticator in EAP.
 
 ## Assumptions
 
@@ -82,7 +80,7 @@ Examples could be Generic Bootstrapping Architecture (GBA) and Authenticated Key
 
 # Protocol
 
-After studying a comparison of both proposals, PSK2 authentication method was selected. In this method, the pre-shared key identifier (ID_CRED_PSK) is sent in message_3. The ID_CRED_PSK allows retrieval of CRED_PSK, a COSE object that contains the PSK. This revision maintains the key information about ID_CRED_PSK and CRED_PSK while updating the status to reflect that a single version has been chosen after evaluation. Through this document we will refer to the Pre-Shared Key authentication method as EDHOC-PSK.
+In this method, the Pre-Shared Key identifier (ID_CRED_PSK) is sent in message_3. The ID_CRED_PSK allows retrieval of CRED_PSK, a COSE object that contains the PSK. Through this document we will refer to the Pre-Shared Key authentication method as EDHOC-PSK.
 
 ## Credentials
 
@@ -209,7 +207,7 @@ message_3 SHALL be a CBOR Sequence, as defined below:
 
 ~~~~~~~~~~~~
 message_3 = (
-  CIPHERTEXT_3
+  CIPHERTEXT_3: bstr,
 )
 ~~~~~~~~~~~~
 
@@ -217,7 +215,7 @@ where:
 
 - CIPHERTEXT_3 is a concatenation of two different ciphertexts:
 
-  - CIPHERTEXT_3A is calculated with a binary additive stream cipher, using a KESYSTREAM_3 generated with EDHOC_Expand and the following plaintext:
+  - CIPHERTEXT_3A is bit string calculated with a binary additive stream cipher, using a KESYSTREAM_3 generated with EDHOC_Expand and the following plaintext:
 
     - PLAINTEXT_3A = ( ID_CRED_PSK )
 
@@ -232,7 +230,7 @@ The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3, CRED_PSK ), def
 
 ## Message 4
 
-message_4 SHALL be a CBOR sequence, defined as:
+message_4 is mandatory and is a CBOR sequence, defined as:
 
 ~~~~~~~~~~~~
 message_4 = (
