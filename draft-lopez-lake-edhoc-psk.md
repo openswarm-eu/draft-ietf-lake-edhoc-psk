@@ -203,7 +203,7 @@ Contrary to {{RFC9528}}, MAC_2 is not used.
 
 ## Message 3
 
-message_3 SHALL be a CBOR Sequence, as defined below:
+message_3 SHALL be a bit string, as defined below:
 
 ~~~~~~~~~~~~
 message_3 = (
@@ -213,9 +213,9 @@ message_3 = (
 
 where:
 
-- CIPHERTEXT_3 is a concatenation of two different ciphertexts:
+- CIPHERTEXT_3 is a concatenation of two different ciphertexts, each of it a CBOR Sequence:
 
-  - CIPHERTEXT_3A is bit string calculated with a binary additive stream cipher, using a KESYSTREAM_3 generated with EDHOC_Expand and the following plaintext:
+  - CIPHERTEXT_3A is CBOR Sequence calculated with a binary additive stream cipher, using a KESYSTREAM_3 generated with EDHOC_Expand and the following plaintext:
 
     - PLAINTEXT_3A = ( ID_CRED_PSK )
 
