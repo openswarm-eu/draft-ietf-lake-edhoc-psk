@@ -3,7 +3,7 @@ title: "EDHOC PSK authentication"
 abbrev: "TODO - Abbreviation"
 category: info
 
-docname: draft-lopez-lake-edhoc-psk-latest
+docname: draft-ietf-lake-edhoc-psk-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
