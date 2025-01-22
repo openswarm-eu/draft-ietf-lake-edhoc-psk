@@ -41,8 +41,12 @@ author:
 normative:
 
   RFC9528:
-  RFC9529:
   RFC9052:
+  RFC9053:
+  RFC8742:
+  RFC8949:
+  RFC8610:
+  RFC8392:
 
 informative:
 
@@ -71,16 +75,15 @@ This efficiency is beneficial in scenarios where frequent key updates are needed
 The use of PSK authentication in EDHOC ensures that session key can be refreshed without heavy computational overhead, typically associated with public key operations, thus optimizing both performance and security.
 
 
-
-## Assumptions
-
 # Conventions and Definitions
 
 {::boilerplate bcp14-tagged}
 
+Readers are expected to be familiar with the terms and concepts described in CBOR {{RFC8949}}, CBOR Sequences {{RFC8742}}, COSE Structures and Processing {{RFC9052}}, COSE Algorithms {{RFC9053}}, CWT and CCS {{RFC8392}}, and the Concise Data Definition Language (CDDL) {{RFC8610}}, which is used to express CBOR data structures.
+
 # Protocol
 
-In this method, the Pre-Shared Key identifier (ID_CRED_PSK) is sent in message_3. The ID_CRED_PSK allows retrieval of CRED_PSK, a COSE object that contains the PSK. Through this document we will refer to the Pre-Shared Key authentication method as EDHOC-PSK.
+In this method, the Pre-Shared Key identifier (ID_CRED_PSK) is sent in message_3. The ID_CRED_PSK allows retrieval of CRED_PSK, a COSE_Key compatible authentication credential that contains the PSK. Through this document we will refer to the Pre-Shared Key authentication method as EDHOC-PSK.
 
 ## Credentials
 
@@ -97,7 +100,7 @@ where:
 ID_CRED_PSK = {4 : h'lf' }
 ~~~~~~~~~~~~
 
-- CRED_PSK is a COSE_Key compatible credential, encoded as a CCS or CWT. For example:
+- CRED_PSK is a COSE_Key compatible authentication credential, i.e., a CBOR Web Token (CWT) or CWT Claims Set (CCS) {{RFC8392}} whose 'cnf' claim uses the confirmation method 'COSE_Key' encoding the PSK. For example:
 
 ~~~~~~~~~~~~
 {                                               /CCS/
@@ -114,8 +117,8 @@ ID_CRED_PSK = {4 : h'lf' }
 
 The purpose of ID_CRED_PSK is to facilitate the retrieval of the PSK.
 It is RECOMMENDED that it uniquely identifies the CRED_PSK as the recipient might otherwise have to try several keys.
-If ID_CRED_PSK contains a single 'kid' parameter, then the compact encoding is applied; see Section 3.5.3.2 of {{RFC9528}}.
-The authentication credential CRED_PSK substitutes CRED_I and CRED_R specified in {{RFC9529}}, and, when applicable, MUST follow the same guidelines described in Sections 3.5.2 and 3.5.3 of {{RFC9528}}.
+If ID_CRED_PSK contains a single 'kid' parameter, then the compact encoding is applied; see [Section 3.5.3.2 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-3.5.3.2).
+The authentication credential CRED_PSK substitutes CRED_I and CRED_R specified in {{RFC9528}}, and, when applicable, MUST follow the same guidelines described in  [Section 3.5.2](https://www.rfc-editor.org/rfc/rfc9528.html#section-3.5.2) and [Section 3.5.3 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-3.5.3).
 
 ## Message flow of PSK
 
@@ -143,7 +146,7 @@ Initiator                                                   Responder
 {: #fig-variant2 title="Overview of message flow of PSK." artwork-align="center"}
 
 This approach provides protection against passive attackers for both Initiator and Responder.
-message_4 remains optional, but is needed to to authenticate the Responder and achieve mutual authentication in EDHOC if not relaying on external applications, such as OSCORE. With this fourth message, the protocol achieves both explicit key confirmation and mutual authentication.
+message_4 remains optional, but is needed to authenticate the Responder and achieve mutual authentication in EDHOC if not relaying on external applications, such as OSCORE. With this fourth message, the protocol achieves both explicit key confirmation and mutual authentication.
 
 # Key derivation
 
@@ -156,14 +159,14 @@ PRK  = EDHOC_Extract( salt, IKM )
 where the salt and input keying material (IKM) are defined for each key.
 The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in the cipher suite.
 
-{{fig-variant2key}} lists the key derivations that differ from those specified in Section 4.1.2 of {{RFC9528}}.
+{{fig-variant2key}} lists the key derivations that differ from those specified in [Section 4.1.2 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-4.1.2).
 
 ~~~~~~~~~~~~
 PRK_3e2m      = PRK_2e
 PRK_4e3m      = EDHOC_Extract( SALT_4e3m, CRED_PSK )
-KEYSTREAM_3   = EDHOC_KDF( PRK_3e2m,    TBD,  TH_3,       key_length )
-K_3           = EDHOC_KDF( PRK_4e3m,    TBD,  TH_3,  key_length )
-IV_3          = EDHOC_KDF( PRK_4e3m,    TBD,  TH_3,  iv_length  )
+KEYSTREAM_3   = EDHOC_KDF( PRK_3e2m,    TBD, TH_3,  ID_CRED_PSK length )
+K_3           = EDHOC_KDF( PRK_4e3m,    TBD, TH_3,  key_length )
+IV_3          = EDHOC_KDF( PRK_4e3m,    TBD, TH_3,  iv_length  )
 ~~~~~~~~~~~~
 {: #fig-variant2key title="Key derivation of EDHOC PSK authentication method." artwork-align="center"}
 
@@ -171,15 +174,18 @@ where:
 
 - KEYSTREAM_3 is used to encrypt the ID_CRED_PSK in message_3.
 - TH_3 = H( TH_2, PLAINTEXT_2, CRED_PSK )
+
+Additionally, the definition of the transcript hash TH_4 is modified as:
+
 - TH_4 = H( TH_3, ID_CRED_PSK, ? EAD_3, CRED_PSK )
 
-# Message formatting and processing. Differences with respect to {{RFC9528}}
+# Message formatting and processing
 
 This section specifies the differences on the message formatting compared to {{RFC9528}}.
 
 ## Message 1
 
-Same as message_1 of EDHOC, described in Section 5.2.1 of {{RFC9528}}.
+Same as message_1 of EDHOC, described in [Section 5.2.1 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-5.2.1).
 
 ## Message 2
 
@@ -203,34 +209,42 @@ Contrary to {{RFC9528}}, MAC_2 is not used.
 
 ## Message 3
 
-message_3 SHALL be a bit string, as defined below:
+message_3 SHALL be a CBOR sequence, as defined below:
 
 ~~~~~~~~~~~~
 message_3 = (
-  CIPHERTEXT_3: bstr,
+  CIPHERTEXT_3: << CIPHERTEXT_SEQUENCE >>
 )
+
+; This defines an array, the elements of
+; which are to be used in a CBOR Sequence:
+
+CIPHERTEXT_SEQUENCE = [CIPHERTEXT_3A, CIPHERTEXT_3B]
+
+CIPHERTEXT_3A = bstr
+CIPHERTEXT_3B = bstr
 ~~~~~~~~~~~~
 
 where:
 
-- CIPHERTEXT_3 is a concatenation of two different ciphertexts, each of it a CBOR Sequence:
+- CIPHERTEXT_3 is CBOR byte string, with value the binary representation of a CBOR Sequence composed of the following two elements:
 
-  - CIPHERTEXT_3A is CBOR Sequence calculated with a binary additive stream cipher, using a KESYSTREAM_3 generated with EDHOC_Expand and the following plaintext:
+  - CIPHERTEXT_3A is CBOR byte string, with value calculated by means of a binary additive stream cipher, XORing a KESYSTREAM_3 generated with EDHOC_Expand and the following plaintext:
 
     - PLAINTEXT_3A = ( ID_CRED_PSK )
 
-  - CIPHERTEXT_3B is a COSE_Encrypt0 object as defined in Sections 5.2 and 5.3 of {{RFC9052}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in Section 5.2 of {{RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
+  - CIPHERTEXT_3B is the 'ciphertext' of COSE_Encrypt0 object as defined in [Section 5.2](https://www.rfc-editor.org/rfc/rfc9528.html#section-5.2) and [Section 5.3 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-5.3), with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in [Section 5.2](https://www.rfc-editor.org/rfc/rfc9528.html#section-5.2), plaintext PLAINTEXT_3B and the following parameters as input:
 
     - protected = h''
     - external_aad = << Enc(ID_CRED_PSK), TH_3 >>
-    - K_3 and IV_3 as defined in Section 5.2
+    - K_3 and IV_3 as defined in [Section 5.2](#message-2)
     - PLAINTEXT_3B = ( ? EAD_3 )
 
-The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3, CRED_PSK ), defined in Section 5.2.
+The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3B, CRED_PSK ), defined in [Section 5.2](#message-2).
 
 ## Message 4
 
-message_4 is mandatory and is a CBOR sequence, defined as:
+message_4 is optional and is a CBOR sequence, defined as:
 
 ~~~~~~~~~~~~
 message_4 = (
@@ -238,7 +252,7 @@ message_4 = (
 )
 ~~~~~~~~~~~~
 
-A fourth message is mandatory for Responder's authentication.
+To authenticate the Responder and achieve mutual authentication, a fourth message is mandatory.
 The Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
 
 # Security Considerations
@@ -253,7 +267,7 @@ When evaluating the security considerations, it is important to differentiate be
 
 ## Identity protection
 
-The current EDHOC methods protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See Section 9.1 of {{RFC9528}}).
+The current EDHOC methods protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See [Section 9.1 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-9.1)).
 With EDHOC-PSK authentication method, both the Initiator's and Responder's identities are protected against passive attackers, but not against active attackers.
 
 ## Number of messages
@@ -275,7 +289,7 @@ EDHOC-PSK authentication method offers privacy and resistance to passive attacks
 # Unified Approach and Recommendations
 
 For use cases involving the transmission of application data, application data can be sent concurrently with message_3, maintaining the protocol's efficiency.
-In applications such as EAP-EDHOC, where application data is not sent, message_4 is mandatory. Thus, EDHOC-PSK authentication method doe snot include any extra messages.
+In applications such as EAP-EDHOC, where application data is not sent, message_4 is mandatory. Thus, EDHOC-PSK authentication method does not include any extra messages.
 Other implementations may continue using OSCORE in place of EDHOC message_4, with a required change in the protocol's language to:
       The Initiator SHALL NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message.
 
