@@ -47,6 +47,7 @@ normative:
   RFC8949:
   RFC8610:
   RFC8392:
+  RFC4279:
 
 informative:
 
@@ -60,19 +61,11 @@ This document specifies the Pre-Shared Key (PSK) authentication method for the E
 
 ## Motivation
 
-Pre-shared key (PSK) authentication method provides a balance between security and computational efficiency.
-This authentication method was proposed in the first I-Ds of Ephemeral Diffie-Hellman Over COSE (EDHOC) {{RFC9528}}, and was ruled out to speed out the development process.
-However, there is now a renewed effort to reintroduce PSK authentication, making this draft an update to the {{RFC9528}}.
+The growth of IoT environemnts has led to a renwed effort to expand the current authentication mechanisms of EDHOC to inlcude Pre-Shared Keys (PSK), making this draft an update to the {{RFC9528}}. In fact, this authentication method was proposed in the first I-Ds of Ephemeral Diffie-Hellman Over COSE (EDHOC) {{RFC9528}}, and was ruled out to speed out the development process. The prevalence of PSK-based authentication is a main reason for its support. Even protocols taht are not oriented towards IoT devices, such as TLS 1.3, have included PSK as an authentication method {{RFC4279}}.
 
-EDHOC with PSK authentication could be beneficial for existing systems where two nodes have been provided with a PSK from other parties out of band.
-This allows the nodes to perform ephemeral Diffie-Hellman to achieve Perfect Forward Secrecy (PFS), ensuring that past communications remain secure even if the PSK is compromised.
-The authentication provided by EDHOC prevents eavesdropping by on-path attackers, as they would need to be active participants in the communication to intercept and potentially tamper with the session.
-Examples could be Generic Bootstrapping Architecture (GBA) and Authenticated Key Management Architecture (AKMA) in mobile systems, or Peer and Authenticator in EAP.
+EDHOC with PSK authentication could be beneficial for existing systems where two nodes have been provided with a PSK from other parties out of band. This allows the nodes to perform ephemeral Diffie-Hellman to achieve Perfect Forward Secrecy (PFS), ensuring that past communications remain secure even if the PSK is compromised. The authentication provided by EDHOC prevents eavesdropping by on-path attackers, as they would need to be active participants in the communication to intercept and potentially tamper with the session. Examples could be Generic Bootstrapping Architecture (GBA) and Authenticated Key Management Architecture (AKMA) in mobile systems, or Peer and Authenticator in EAP.
 
-Another prominent use case of PSK authentication in the EDHOC protocol is session resumption.
-This allows previously connected parties to quickly reestablish secure communication using pre-shared keys from their earlier session, reducing the overhead of full key exchange.
-This efficiency is beneficial in scenarios where frequent key updates are needed, such in resource-constrained environments or applications requiring high-frequency secure communications.
-The use of PSK authentication in EDHOC ensures that session key can be refreshed without heavy computational overhead, typically associated with public key operations, thus optimizing both performance and security.
+Another prominent use case of PSK authentication in the EDHOC protocol is session resumption. This allows previously connected parties to quickly reestablish secure communication using pre-shared keys from their earlier session, reducing the overhead of full key exchange. This efficiency is beneficial in scenarios where frequent key updates are needed, such in resource-constrained environments or applications requiring high-frequency secure communications. The use of PSK authentication in EDHOC ensures that session key can be refreshed without heavy computational overhead, typically associated with public key operations, thus optimizing both performance and security.
 
 
 # Conventions and Definitions
@@ -256,26 +249,20 @@ When evaluating the security considerations, it is important to differentiate be
     Over multiple resumption sessions, initiating a full EDHOC session changes the resumption PSK, resulting in a new ID_CRED_PSK.
     The periodic renewal of the CRED_PSK and ID_CRED_PSK helps mitigate long-term privacy risks associated with static key identifiers.
 
-## Identity protection
+PSK authentication method introduces changes with respect to the current specification of EDHOC {{RFC9528}}. The protocol differs from EDHOC in the following ways:
 
-The current EDHOC methods protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See [Section 9.1 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-9.1)).
-With EDHOC-PSK authentication method, both the Initiator's and Responder's identities are protected against passive attackers, but not against active attackers.
+  - ID_CRED_PSK is encrypted and sent in message 3, XOR encrypted with a keystream derived from the ephemeral shared secret G_XY. As a consequence, contrary totThe current EDHOC methods that protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See [Section 9.1 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-9.1)), EDHOC-PSK provides identity protection for both the Initator and the Responder against passive attackers.
+  -  Mutual authentication depends on the security of the session key, i.e., the protocol's confidentiality. Both properties hold as long as the PSK remains secret.
+  - Both the ephemeral components and the PSK are used as inputs of Key Derivation Function (KDF) to derive intermedaite keys (PRK). This hybrid approach guarantees as well post-quantum security, as defined in [Section 6.1](#post-quantum-considerations).
+  - The current EDHOC protocol consists of three mandatory messages and an optional fourth message. In the case of EDHOC-PSK authentication method, message_4 remains optional, but mutual authentication is not guaranteed without it, or an OSCORE message or any application data that confirms that the Responder owns the PSK. Additionally, with this fourth message the protocol achieves explicit key confirmation in addition to mutual authentication.
+  - Similarly to {{RFC9528}}, EDHOC-PSK provides external authorization data protection.
 
-## Number of messages
+## Post Quantum Considerations
 
-The current EDHOC protocol consists of three mandatory messages and an optional fourth message.
-In the case of EDHOC-PSK authentication method, message_4 remains optional, but mutual authentication is not guaranteed without it, or an OSCORE message or any application data that confirms that the Responder owns the PSK. Additionally, with this fourth message the protocol achieves explicit key confirmation in addition to mutual authentication.
+Recent achievements in developing quantum computers demonstrate that it is probably feasible to build one that is cryptographically significant. If such a computer is implemented, many of the cryptographic algorithms and protocols currently in use would be insecure. A quantum computer would be able to solve Diffie-Hellman (DH) and Elliptic Curve Diffie-Hellman (ECDH) problems in polynomial time.
 
-## External Authorization Data
-
-The Initiator and Responder can send information in EAD_3 and EAD_4 or in OSCORE messages in parallel with message_3 and message_4.
-This is possible because the Initiator knows that only the Responder with access to the CRED_PSK can decrypt the information.
-
-## Attacks
-
-EDHOC-PSK authentication method offers privacy and resistance to passive attacks but might be vulnerable to certain active attacks due to delayed authentication.
-
-# Privacy Considerations
+EDCHOC with pre-shared keys would not be vulnerable to quantum attacks because those keys are used as inputs to the key derivation function. The use of intermediate keys derived through key derivation functions ensure that the message is not immediately compromised if the symmetrically distributed key (PSK) is compromised, or if the algorithm used to distribute keys asymmetrically (DH) is broken. If the pre-shared key has sufficient entropy and the Key Derivation Function (KDF), encryption, and authentication transforms are quantum secure, then the resulting system is believed to be quantum secure.
+Therefore, provided that the PSK remains secret, EDHOC-PSK provides confidentiality, mutual authentication and Perfect Forward Secrecy (PFS) even in the presence of quantum attacks. What is more, the key exchange is still a key agreement where both parties contribute with randomness.
 
 # Unified Approach and Recommendations
 
