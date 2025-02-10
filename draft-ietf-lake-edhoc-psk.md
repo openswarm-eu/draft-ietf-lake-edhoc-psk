@@ -164,9 +164,9 @@ The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in 
 ~~~~~~~~~~~~
 PRK_3e2m    = PRK_2e
 PRK_4e3m    = EDHOC_Extract( SALT_4e3m, CRED_PSK )
-KEYSTREAM_3 = EDHOC_KDF( PRK_3e2m, TBD, TH_3, ID_CRED_PSK length )
-K_3         = EDHOC_KDF( PRK_4e3m, TBD, TH_3, key_length )
-IV_3        = EDHOC_KDF( PRK_4e3m, TBD, TH_3, iv_length )
+KEYSTREAM_3 = EDHOC_KDF( PRK_3e2m, TBD1, TH_3, ID_CRED_PSK length )
+K_3         = EDHOC_KDF( PRK_4e3m, TBD2, TH_3, key_length )
+IV_3        = EDHOC_KDF( PRK_4e3m, TBD3, TH_3, iv_length )
 ~~~~~~~~~~~~
 {: #fig-variant2key title="Key Derivation of EDHOC PSK Authentication Method." artwork-align="center"}
 
