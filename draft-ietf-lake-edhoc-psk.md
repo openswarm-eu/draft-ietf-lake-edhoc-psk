@@ -16,9 +16,9 @@ venue:
   group: LAKE
   type: Working Group
   mail: lake@ietf.org
-  arch: https://example.com/WG
+  arch: https://mailarchive.ietf.org/arch/browse/lake/
   github: lake-wg/psk
-  latest: https://elsalopez133.github.io/draft-lopez-lake-edhoc-psk/draft-ietf-lake-edhoc-psk.html
+  latest: https://lake-wg.github.io/psk/#go.draft-ietf-lake-edhoc-psk.html
 
 author:
  -
