@@ -291,7 +291,11 @@ This consideration was important for the privacy properties when using asymmetri
 
 # IANA Considerations
 
-This document has no IANA actions.
+This document has IANA actions.
+
+## EDHOC Method Type Registry
+
+## EDHOC Exporter Label Registry
 
 --- back
 
