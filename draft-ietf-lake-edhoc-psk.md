@@ -143,7 +143,7 @@ Initiator                                                   Responder
 |<------------------------------------------------------------------+
 |                             message_4                             |
 ~~~~~~~~~~~~
-{: #fig-variant2 title="Overview of message flow of PSK." artwork-align="center"}
+{: #fig-variant2 title="Overview of Message Flow of PSK." artwork-align="center"}
 
 This approach provides protection against passive attackers for both Initiator and Responder.
 message_4 remains optional, but is needed to authenticate the Responder and achieve mutual authentication in EDHOC if not relaying on external applications, such as OSCORE. With this fourth message, the protocol achieves both explicit key confirmation and mutual authentication.
@@ -168,7 +168,7 @@ KEYSTREAM_3 = EDHOC_KDF( PRK_3e2m, TBD, TH_3, ID_CRED_PSK length )
 K_3         = EDHOC_KDF( PRK_4e3m, TBD, TH_3, key_length )
 IV_3        = EDHOC_KDF( PRK_4e3m, TBD, TH_3, iv_length )
 ~~~~~~~~~~~~
-{: #fig-variant2key title="Key derivation of EDHOC PSK authentication method." artwork-align="center"}
+{: #fig-variant2key title="Key Derivation of EDHOC PSK Authentication Method." artwork-align="center"}
 
 where:
 
