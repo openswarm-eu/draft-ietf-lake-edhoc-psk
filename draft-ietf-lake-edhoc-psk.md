@@ -1,40 +1,40 @@
 ---
-title: "EDHOC PSK authentication"
-abbrev: "TODO - Abbreviation"
-category: info
-
+title: "EDHOC PSK Authentication"
 docname: draft-ietf-lake-edhoc-psk-latest
+category: std
+
+v3xml2rfc:
+  silence:
+  - Found SVG with width or height specified
+
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
-number:
-date:
 consensus: true
 v: 3
 area: Security
 workgroup: LAKE Working Group
-keyword:
 venue:
   group: LAKE
   type: Working Group
   mail: lake@ietf.org
   arch: https://example.com/WG
-  github: ElsaLopez133/draft-lopez-lake-psk
-  latest: https://elsalopez133.github.io/draft-lopez-lake-edhoc-psk/#go.draft-lopez-lake-edhoc-psk.html
+  github: lake-wg/psk
+  latest: https://elsalopez133.github.io/draft-lopez-lake-edhoc-psk/draft-ietf-lake-edhoc-psk.html
 
 author:
  -
-    fullname: Elsa Lopez-Perez
+    name: Elsa Lopez-Perez
     organization: Inria
     email: elsa.lopez-perez@inria.fr
  -
-    fullname: Göran Selander
+    name: Göran Selander
     organization: Ericsson
     email: goran.selander@ericsson.com
  -
-    fullname: John Preuß Mattsson
+    name: John | Preuß Mattsson
     organization: Ericsson
     email: john.mattsson@ericsson.com
  -
-    fullname: Rafael Marin-Lopez
+    name: Rafael Marin-Lopez
     organization: University of Murcia
     email: rafa@um.es
 
