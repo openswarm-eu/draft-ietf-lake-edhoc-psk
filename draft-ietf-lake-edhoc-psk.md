@@ -202,7 +202,7 @@ where:
 - G_Y_CIPHERTEXT_2 is the concatenation of G_Y (i.e., the ephemeral public key of the Responder) and CIPHERTEXT_2.
 - CIPHERTEXT_2 is calculated with a binary additive stream cipher, using KEYSTREAM_2 and the following plaintext:
 
-  - PLAINTEXT_2 = ( C_R, / bstr / -24..23, ? EAD_2 )
+  - PLAINTEXT_2 = ( C_R, ? EAD_2 )
   - CIPHERTEXT_2 = PLAINTEXT_2 XOR KEYSTREAM_2
 
 Contrary to {{RFC9528}}, MAC_2 is not used.
@@ -222,7 +222,7 @@ where:
 
 - CIPHERTEXT_3A is CBOR byte string, with value calculated by means of a binary additive stream cipher, XORing a KESYSTREAM_3 generated with EDHOC_Expand and the following plaintext:
 
-  - PLAINTEXT_3A = ( ID_CRED_PSK )
+  - PLAINTEXT_3A = ( ID_CRED_PSK / bstr / -24..23, ? EAD_3 )
 
 - CIPHERTEXT_3B is the 'ciphertext' of COSE_Encrypt0 object as defined in {{Section 5.2 and Section 5.3 of RFC9528}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in {{Section 5.2 of RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
@@ -235,7 +235,7 @@ The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3B, CRED_PSK ), de
 
 ## Message 4
 
-message_4 is optional and is a CBOR sequence, defined as:
+message_4 is a CBOR sequence, defined as:
 
 ~~~~~~~~~~~~
 message_4 = (
