@@ -117,8 +117,8 @@ ID_CRED_PSK = {4 : h'lf' }
 
 The purpose of ID_CRED_PSK is to facilitate the retrieval of the PSK.
 It is RECOMMENDED that it uniquely identifies the CRED_PSK as the recipient might otherwise have to try several keys.
-If ID_CRED_PSK contains a single 'kid' parameter, then the compact encoding is applied; see [Section 3.5.3.2 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-3.5.3.2).
-The authentication credential CRED_PSK substitutes CRED_I and CRED_R specified in {{RFC9528}}, and, when applicable, MUST follow the same guidelines described in  [Section 3.5.2](https://www.rfc-editor.org/rfc/rfc9528.html#section-3.5.2) and [Section 3.5.3 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-3.5.3).
+If ID_CRED_PSK contains a single 'kid' parameter, then the compact encoding is applied; see {{Section 3.5.3.2 of RFC9528}}.
+The authentication credential CRED_PSK substitutes CRED_I and CRED_R specified in {{RFC9528}}, and, when applicable, MUST follow the same guidelines described in {{Section 3.5.2 and Section 3.5.3 of RFC9528}}.
 
 ## Message Flow of PSK
 
@@ -159,7 +159,7 @@ PRK  = EDHOC_Extract( salt, IKM )
 where the salt and input keying material (IKM) are defined for each key.
 The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in the cipher suite.
 
-{{fig-variant2key}} lists the key derivations that differ from those specified in [Section 4.1.2 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-4.1.2).
+{{fig-variant2key}} lists the key derivations that differ from those specified in {{Section 4.1.2 of RFC9528}}.
 
 ~~~~~~~~~~~~
 PRK_3e2m    = PRK_2e
@@ -224,7 +224,7 @@ where:
 
   - PLAINTEXT_3A = ( ID_CRED_PSK )
 
-- CIPHERTEXT_3B is the 'ciphertext' of COSE_Encrypt0 object as defined in [Section 5.2](https://www.rfc-editor.org/rfc/rfc9528.html#section-5.2) and [Section 5.3 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-5.3), with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in [Section 5.2](https://www.rfc-editor.org/rfc/rfc9528.html#section-5.2), plaintext PLAINTEXT_3B and the following parameters as input:
+- CIPHERTEXT_3B is the 'ciphertext' of COSE_Encrypt0 object as defined in {{Section 5.2 and Section 5.3 of RFC9528}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in {{Section 5.2 of RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
   - protected = h''
   - external_aad = << Enc(ID_CRED_PSK), TH_3 >>
