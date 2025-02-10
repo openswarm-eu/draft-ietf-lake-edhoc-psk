@@ -120,7 +120,7 @@ It is RECOMMENDED that it uniquely identifies the CRED_PSK as the recipient migh
 If ID_CRED_PSK contains a single 'kid' parameter, then the compact encoding is applied; see [Section 3.5.3.2 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-3.5.3.2).
 The authentication credential CRED_PSK substitutes CRED_I and CRED_R specified in {{RFC9528}}, and, when applicable, MUST follow the same guidelines described in  [Section 3.5.2](https://www.rfc-editor.org/rfc/rfc9528.html#section-3.5.2) and [Section 3.5.3 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-3.5.3).
 
-## Message flow of PSK
+## Message Flow of PSK
 
 The ID_CRED_PSK is sent in message_3, encrypted using a key derived from the ephemeral shared secret, G_XY. The Responder authenticates the Initiator first.
 {{fig-variant2}} shows the message flow of PSK authentication method.
@@ -148,7 +148,7 @@ Initiator                                                   Responder
 This approach provides protection against passive attackers for both Initiator and Responder.
 message_4 remains optional, but is needed to authenticate the Responder and achieve mutual authentication in EDHOC if not relaying on external applications, such as OSCORE. With this fourth message, the protocol achieves both explicit key confirmation and mutual authentication.
 
-# Key derivation
+# Key Derivation
 
 The pseudorandom keys (PRKs) used for PSK authentication method in EDHOC are derived using EDHOC_Extract, as done in {{RFC9528}}.
 
@@ -179,7 +179,7 @@ Additionally, the definition of the transcript hash TH_4 is modified as:
 
 - TH_4 = H( TH_3, ID_CRED_PSK, ? EAD_3, CRED_PSK )
 
-# Message formatting and processing
+# Message Formatting and Processing
 
 This section specifies the differences on the message formatting compared to {{RFC9528}}.
 
@@ -256,12 +256,12 @@ When evaluating the security considerations, it is important to differentiate be
     Over multiple resumption sessions, initiating a full EDHOC session changes the resumption PSK, resulting in a new ID_CRED_PSK.
     The periodic renewal of the CRED_PSK and ID_CRED_PSK helps mitigate long-term privacy risks associated with static key identifiers.
 
-## Identity protection
+## Identity Protection
 
 The current EDHOC methods protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See [Section 9.1 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-9.1)).
 With EDHOC-PSK authentication method, both the Initiator's and Responder's identities are protected against passive attackers, but not against active attackers.
 
-## Number of messages
+## Number of Messages
 
 The current EDHOC protocol consists of three mandatory messages and an optional fourth message.
 In the case of EDHOC-PSK authentication method, message_4 remains optional, but mutual authentication is not guaranteed without it, or an OSCORE message or any application data that confirms that the Responder owns the PSK. Additionally, with this fourth message the protocol achieves explicit key confirmation in addition to mutual authentication.
