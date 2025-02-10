@@ -10,7 +10,7 @@ This is the working area for the individual Internet-Draft, "EDHOC PSK authentic
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/ElsaLopez133/draft-lopez-lake-edhoc-psk/blob/main/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/lake-wg/psk/blob/main/CONTRIBUTING.md).
 
 Contributions can be made by creating pull requests.
 The GitHub interface supports creating pull requests using the Edit (✏) button.
