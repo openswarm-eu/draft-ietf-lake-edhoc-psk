@@ -3,10 +3,9 @@
 This is the working area for the individual Internet-Draft, "EDHOC PSK authentication".
 
 * [Editor's Copy](https://ElsaLopez133.github.io/draft-lopez-lake-edhoc-psk/#go.draft-lopez-lake-edhoc-psk.html)
-* [Datatracker Page](https://datatracker.ietf.org/doc/draft-lopez-lake-edhoc-psk)
-* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-lopez-lake-edhoc-psk)
+* [Datatracker Page](https://datatracker.ietf.org/doc/draft-ietf-lake-edhoc-psk/)
+* [Working Group Draft](https://datatracker.ietf.org/doc/html/draft-lopez-lake-edhoc-psk)
 * [Compare Editor's Copy to Individual Draft](https://ElsaLopez133.github.io/draft-lopez-lake-edhoc-psk/#go.draft-lopez-lake-edhoc-psk.diff)
-
 
 ## Contributing
 
