@@ -185,7 +185,7 @@ This section specifies the differences on the message formatting compared to {{R
 
 ## Message 1
 
-Same as message_1 of EDHOC, described in [Section 5.2.1 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-5.2.1).
+Same as message_1 of EDHOC, described in {{Section 5.2.1 of RFC9528}}.
 
 ## Message 2
 
