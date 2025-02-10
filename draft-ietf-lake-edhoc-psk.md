@@ -295,6 +295,26 @@ This document has no IANA actions.
 
 --- back
 
+# CDDL Definitions {#CDDL}
+
+TODO (Similar to Appendix C.2 of RFC 9528)
+
+# Change Log
+
+RFC Editor: Please remove this appendix.
+
+* From -02 to -03
+
+  * TODO
+
+* From -01 to -02
+
+  * TODO
+
+* From -00 to -01
+
+  * TODO
+
 # Acknowledgments
 {:numbered="false"}
 
