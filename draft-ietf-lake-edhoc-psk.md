@@ -162,11 +162,11 @@ The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in 
 {{fig-variant2key}} lists the key derivations that differ from those specified in [Section 4.1.2 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-4.1.2).
 
 ~~~~~~~~~~~~
-PRK_3e2m      = PRK_2e
-PRK_4e3m      = EDHOC_Extract( SALT_4e3m, CRED_PSK )
-KEYSTREAM_3   = EDHOC_KDF( PRK_3e2m,    TBD, TH_3,  ID_CRED_PSK length )
-K_3           = EDHOC_KDF( PRK_4e3m,    TBD, TH_3,  key_length )
-IV_3          = EDHOC_KDF( PRK_4e3m,    TBD, TH_3,  iv_length  )
+PRK_3e2m    = PRK_2e
+PRK_4e3m    = EDHOC_Extract( SALT_4e3m, CRED_PSK )
+KEYSTREAM_3 = EDHOC_KDF( PRK_3e2m, TBD, TH_3, ID_CRED_PSK length )
+K_3         = EDHOC_KDF( PRK_4e3m, TBD, TH_3, key_length )
+IV_3        = EDHOC_KDF( PRK_4e3m, TBD, TH_3, iv_length )
 ~~~~~~~~~~~~
 {: #fig-variant2key title="Key derivation of EDHOC PSK authentication method." artwork-align="center"}
 
