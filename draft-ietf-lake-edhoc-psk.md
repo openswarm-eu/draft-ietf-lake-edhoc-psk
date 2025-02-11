@@ -181,48 +181,41 @@ Additionally, the definition of the transcript hash TH_4 is modified as:
 
 # Message Formatting and Processing
 
-This section specifies the differences in message formatting and processing compared to {{RFC9528}}
+This section specifies the differences in message formatting and processing compared to {{Section 5 of RFC9528}}.
 
 ## Message 1
 
-Message 1 is formatted and processed exactly as specified in {{Section 5.2 of RFC9528}}
+Message 1 is formatted and processed as specified in {{Section 5.2 of RFC9528}}.
 
 ## Message 2
 
-message_2 SHALL be a CBOR sequence, defined as:
+### Formatting of Message 2
 
-~~~~~~~~~~~~
-message_2 = (
-  G_Y_CIPHERTEXT_2 : bstr,
-)
-~~~~~~~~~~~~
+Message 2 is formatted as specified in {{Section 5.3.1 of RFC9528}}.
 
-where:
+### Responder Composition of Message 2
 
-- G_Y_CIPHERTEXT_2 is the concatenation of G_Y (i.e., the ephemeral public key of the Responder) and CIPHERTEXT_2.
-- CIPHERTEXT_2 is calculated with a binary additive stream cipher, using KEYSTREAM_2 and the following plaintext:
+CIPHERTEXT_2 is calculated with a binary additive stream cipher, using a keystream generated with EDHOC_Expand, and the following plaintext:
 
-  - PLAINTEXT_2 = ( C_R, ? EAD_2 )
-  - CIPHERTEXT_2 = PLAINTEXT_2 XOR KEYSTREAM_2
+* PLAINTEXT_2 = ( C_R, ? EAD_2 )
 
-Contrary to {{RFC9528}}, MAC_2 is not used.
+Contrary to {{RFC9528}}, ID_CRED_R, MAC_2, and Signature_or_MAC_2 are not used. C_R, EAD_2, CIPHERTEXT_2, and KEYSTREAM_2 are defined in {{Section 5.3.2 of RFC9528}}.
+
+### Initiator Processing of Message 2
+
+Compared to {{Section 5.3.3 of RFC9528}}, ID_CRED_R is not made available to the application in step 4, and steps 5 and 6 are skipped
 
 ## Message 3
 
-message_3 SHALL be a CBOR sequence, as defined below:
+### Formatting of Message 3
 
-~~~~~~~~~~~~
-message_3 = (
-  CIPHERTEXT_3A: bstr,
-  CIPHERTEXT_3B: bstr,
-)
-~~~~~~~~~~~~
+Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 
-where:
+### Initiator Composition of Message 3
 
 - CIPHERTEXT_3A is CBOR byte string, with value calculated by means of a binary additive stream cipher, XORing a KESYSTREAM_3 generated with EDHOC_Expand and the following plaintext:
 
-  - PLAINTEXT_3A = ( ID_CRED_PSK / bstr / -24..23, ? EAD_3 )
+  - PLAINTEXT_3 = ( ID_CRED_PSK / bstr / -24..23, ? EAD_3 )
 
 - CIPHERTEXT_3B is the 'ciphertext' of COSE_Encrypt0 object as defined in {{Section 5.2 and Section 5.3 of RFC9528}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in {{Section 5.2 of RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
@@ -233,18 +226,15 @@ where:
 
 The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3B, CRED_PSK ), defined in [Section 5.2](#message-2).
 
+### Responder Processing of Message 3
+
 ## Message 4
 
-message_4 is a CBOR sequence, defined as:
+Message 4 is formatted and processed as specified in {{Section 5.5 of RFC9528}}.
 
-~~~~~~~~~~~~
-message_4 = (
-  CIPHERTEXT_4 : bstr,
-)
-~~~~~~~~~~~~
+Compared to {{RFC9528}}, a fourth message does not only provide key confirmation but also Responder authentication. To authenticate the Responder and achieve mutual authentication, a fourth message is mandatory.
 
-To authenticate the Responder and achieve mutual authentication, a fourth message is mandatory.
-The Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
+After verifying message_4, the Initiator is assured that the Responder has calculated the key PRK_out (key confirmation) and that no other party can derive the key. The Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
 
 # Security Considerations
 
@@ -301,7 +291,64 @@ This document has IANA actions.
 
 # CDDL Definitions {#CDDL}
 
-TODO (Similar to Appendix C.2 of RFC 9528)
+This section compiles the CDDL definitions for easy reference, incorporating errata filed against {{RFC9528}}.
+
+~~~~~~~~~~~ CDDL
+suites = [ 2* int ] / int
+
+ead = (
+  ead_label : int,
+  ? ead_value : bstr,
+)
+
+EAD_1 = (1* ead)
+EAD_2 = (1* ead)
+EAD_3 = (1* ead)
+EAD_4 = (1* ead)
+
+message_1 = (
+  METHOD : int,
+  SUITES_I : suites,
+  G_X : bstr,
+  C_I : bstr / -24..23,
+  ? EAD_1,
+)
+
+message_2 = (
+  G_Y_CIPHERTEXT_2 : bstr,
+)
+
+PLAINTEXT_2 = (
+  C_R : bstr / -24..23,
+  ? EAD_2,
+)
+
+message_3 = (
+  CIPHERTEXT_3 : bstr,
+)
+
+PLAINTEXT_3 = (
+)
+
+message_4 = (
+  CIPHERTEXT_4 : bstr,
+)
+
+PLAINTEXT_4 = (
+  ? EAD_4,
+)
+
+error = (
+  ERR_CODE : int,
+  ERR_INFO : any,
+)
+
+info = (
+  info_label : int,
+  context : bstr,
+  length : uint,
+)
+~~~~~~~~~~~
 
 # Change Log
 
