@@ -181,11 +181,11 @@ Additionally, the definition of the transcript hash TH_4 is modified as:
 
 # Message Formatting and Processing
 
-This section specifies the differences on the message formatting compared to {{RFC9528}}.
+This section specifies the differences in message formatting and processing compared to {{RFC9528}}
 
 ## Message 1
 
-Same as message_1 of EDHOC, described in {{Section 5.2.1 of RFC9528}}.
+Message 1 is formatted and processed exactly as specified in {{Section 5.2 of RFC9528}}
 
 ## Message 2
 
