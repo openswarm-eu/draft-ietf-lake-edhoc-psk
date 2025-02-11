@@ -378,4 +378,9 @@ RFC Editor: Please remove this appendix.
 # Acknowledgments
 {:numbered="false"}
 
-TODO acknowledge.
+The authors want to thank
+{{{Christian Amsüss}}},
+{{{Scott Fluhrer}}},
+and
+{{{Marco Tiloca}}}
+for reviewing and commenting on intermediate versions of the draft. 
