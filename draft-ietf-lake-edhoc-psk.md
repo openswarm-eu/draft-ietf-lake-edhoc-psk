@@ -293,6 +293,8 @@ This document has IANA actions.
 
 ## EDHOC Exporter Label Registry
 
+## EDHOC Info Label Registry
+
 --- back
 
 # CDDL Definitions {#CDDL}
