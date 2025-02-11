@@ -215,7 +215,7 @@ Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 
 * CIPHERTEXT_3 is calculated with a binary additive stream cipher, using a keystream generated with EDHOC_Expand, and the following plaintext:
 
-   * PLAINTEXT_3 = ( ID_CRED_R / bstr / -24..23, INNER_CIPHERTEXT, ? EAD_3 )
+   * PLAINTEXT_3 = ( ID_CRED_R / bstr / -24..23, INNER_CIPHERTEXT_3, ? EAD_3 )
 
       * If ID_CRED_PSK contains a single 'kid' parameter, i.e., ID_CRED_PSK = { 4 : kid_PSK }, then the compact encoding is applied, see {{Section 3.5.3.2 of RFC9528}}.
 
@@ -223,7 +223,7 @@ Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 
    * CIPHERTEXT_3 = PLAINTEXT_3 XOR KEYSTREAM_3
 
-* INNER_CIPHERTEXT is the 'ciphertext' of COSE_Encrypt0 object as defined in {{Section 5.2 and Section 5.3 of RFC9528}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in {{Section 5.2 of RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
+* INNER_CIPHERTEXT_3 is the 'ciphertext' of COSE_Encrypt0 object as defined in {{Section 5.2 and Section 5.3 of RFC9528}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in {{Section 5.2 of RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
   - protected = h''
   - external_aad = << Enc(ID_CRED_PSK), TH_3 >>
@@ -334,6 +334,9 @@ message_3 = (
 )
 
 PLAINTEXT_3 = (
+  ID_CRED_PSK : header_map / bstr / -24..23,
+  INNER_CIPHERTEXT_3 : bstr,
+  ? EAD_3,
 )
 
 message_4 = (
