@@ -197,9 +197,10 @@ Message 2 is formatted as specified in {{Section 5.3.1 of RFC9528}}.
 
 CIPHERTEXT_2 is calculated with a binary additive stream cipher, using a keystream generated with EDHOC_Expand, and the following plaintext:
 
-* PLAINTEXT_2 = ( C_R, ? EAD_2 )
+* PLAINTEXT_2B = ( C_R, ? EAD_2 )
+* CIPHERTEXT_2 = PLAINTEXT_2B XOR KEYSTREAM_2
 
-Contrary to {{RFC9528}}, ID_CRED_R, MAC_2, and Signature_or_MAC_2 are not used. C_R, EAD_2, CIPHERTEXT_2, and KEYSTREAM_2 are defined in {{Section 5.3.2 of RFC9528}}.
+Contrary to {{RFC9528}}, ID_CRED_R, MAC_2, and Signature_or_MAC_2 are not used. C_R, EAD_2, and KEYSTREAM_2 are defined in {{Section 5.3.2 of RFC9528}}.
 
 ### Initiator Processing of Message 2
 
@@ -215,13 +216,13 @@ Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 
 * CIPHERTEXT_3 is calculated with a binary additive stream cipher, using a keystream generated with EDHOC_Expand, and the following plaintext:
 
-   * PLAINTEXT_3 = ( ID_CRED_R / bstr / -24..23, INNER_CIPHERTEXT_3, ? EAD_3 )
+   * PLAINTEXT_3B = ( ID_CRED_R / bstr / -24..23, INNER_CIPHERTEXT_3, ? EAD_3 )
 
       * If ID_CRED_PSK contains a single 'kid' parameter, i.e., ID_CRED_PSK = { 4 : kid_PSK }, then the compact encoding is applied, see {{Section 3.5.3.2 of RFC9528}}.
 
    * Compute KEYSTREAM_3 as in {{key-der}}, where plaintext_length is the length of PLAINTEXT_3. For the case of plaintext_length exceeding the EDHOC_KDF output size, see {{Appendix G of RFC9528}}.
 
-   * CIPHERTEXT_3 = PLAINTEXT_3 XOR KEYSTREAM_3
+   * CIPHERTEXT_3 = PLAINTEXT_3B XOR KEYSTREAM_3
 
 * INNER_CIPHERTEXT_3 is the 'ciphertext' of COSE_Encrypt0 object as defined in {{Section 5.2 and Section 5.3 of RFC9528}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in {{Section 5.2 of RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
@@ -326,7 +327,7 @@ message_2 = (
   G_Y_CIPHERTEXT_2 : bstr,
 )
 
-PLAINTEXT_2 = (
+PLAINTEXT_2B = (
   C_R : bstr / -24..23,
   ? EAD_2,
 )
@@ -335,7 +336,7 @@ message_3 = (
   CIPHERTEXT_3 : bstr,
 )
 
-PLAINTEXT_3 = (
+PLAINTEXT_3B = (
   ID_CRED_PSK : header_map / bstr / -24..23,
   INNER_CIPHERTEXT_3 : bstr,
   ? EAD_3,
