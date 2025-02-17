@@ -88,7 +88,7 @@ where:
 - ID_CRED_PSK is a COSE header map containing header parameters that can identify a pre-shared key. For example:
 
 ~~~~~~~~~~~~
-ID_CRED_PSK = {4 : h'lf' }
+ID_CRED_PSK = {4 : h'0f' }
 ~~~~~~~~~~~~
 
 - CRED_PSK is a COSE_Key compatible authentication credential, i.e., a CBOR Web Token (CWT) or CWT Claims Set (CCS) {{RFC8392}} whose 'cnf' claim uses the confirmation method 'COSE_Key' encoding the PSK. For example:
@@ -99,7 +99,7 @@ ID_CRED_PSK = {4 : h'lf' }
   8 : {                                         /cnf/
     1 : {                                       /COSE_Key/
        1 : 4,                                   /kty/
-       2 : h'32',                               /kid/
+       2 : h'0f',                               /kid/
       -1 : h'50930FF462A77A3540CF546325DEA214'  /k/
     }
   }
