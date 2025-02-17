@@ -1,5 +1,5 @@
 ---
-title: "EDHOC PSK Authentication"
+title: "EDHOC with Pre-Shared Key (PSK) Authentication"
 docname: draft-ietf-lake-edhoc-psk-latest
 category: std
 
@@ -52,28 +52,19 @@ informative:
 
 --- abstract
 
-This document specifies the Pre-Shared Key (PSK) authentication method for the Ephemeral Diffie-Hellman Over COSE (EDHOC) key exchange protocol. It describes the authentication processes, message flows, and security considerations of this authentication method.
+This document specifies a Pre-Shared Key (PSK) authentication method for the Ephemeral Diffie-Hellman Over COSE (EDHOC) key exchange protocol. The PSK method improves computational efficiency while ensuring mutual authentication, ephemeral key exchange, and identity protection, while also offering quantum resistance. It is particularly suited for systems where nodes share a PSK out-of-band and enables efficient session resumption with less computational overhead. This document details the PSK method flow, key derivation changes, message formatting, processing, and security considerations.
 
 --- middle
 
 # Introduction
 
-## Motivation
+This document defines a Pre-Shared Key (PSK) authentication method for the Ephemeral Diffie-Hellman Over COSE (EDHOC) key exchange protocol {{RFC9528}}. The PSK method balances the complexity of credential distribution with computational efficiency. While symmetrical key distribution is more complex than asymmetrical approaches, PSK authentication offers greater computational efficiency compared to the methods outlined in {{RFC9528}}. The PSK method retains mutual authentication, asymmetric ephemeral key exchange, and identity protections established by {{RFC9528}}. By utilizing the PSK for both authentication and key derivation, this method provides quantum resistance.
 
-Pre-shared key (PSK) authentication method provides a balance between security and computational efficiency.
-This authentication method was proposed in the first I-Ds of Ephemeral Diffie-Hellman Over COSE (EDHOC) {{RFC9528}}, and was ruled out to speed out the development process.
-However, there is now a renewed effort to reintroduce PSK authentication, making this draft an update to the {{RFC9528}}.
+EDHOC with PSK authentication benefits systems where two nodes nodes share a Pre-Shared Key (PSK) provided out-of-band. This applies to scenarios like the Authenticated Key Management Architecture (AKMA) in mobile systems or the Peer and Authenticator in Extensible Authentication Protocol (EAP) systems. The PSK method enables the nodes to perform ephemeral key exchange, achieving Perfect Forward Secrecy (PFS). This ensures that even if the PSK is compromised, past communications remain secure against active attackers, while future communications are protected from passive attackers. Additionally, by leveraging the PSK for both authentication and key derivation, the method offers quantum resistance key exchange and authentication.
 
-EDHOC with PSK authentication could be beneficial for existing systems where two nodes have been provided with a PSK from other parties out of band.
-This allows the nodes to perform ephemeral Diffie-Hellman to achieve Perfect Forward Secrecy (PFS), ensuring that past communications remain secure even if the PSK is compromised.
-The authentication provided by EDHOC prevents eavesdropping by on-path attackers, as they would need to be active participants in the communication to intercept and potentially tamper with the session.
-Examples could be Generic Bootstrapping Architecture (GBA) and Authenticated Key Management Architecture (AKMA) in mobile systems, or Peer and Authenticator in EAP.
+Another key use case of PSK authentication in the EDHOC protocol is session resumption. This enables previously connected parties to quickly reestablish secure communication using pre-shared keys from a prior session, reducing the overhead associated with key exchange and asymmetric authentication. By using PSK authentication, EDHOC allows session keys to be refreshed with significantly lower computational overhead compared to public-key authentication.
 
-Another prominent use case of PSK authentication in the EDHOC protocol is session resumption.
-This allows previously connected parties to quickly reestablish secure communication using pre-shared keys from their earlier session, reducing the overhead of full key exchange.
-This efficiency is beneficial in scenarios where frequent key updates are needed, such in resource-constrained environments or applications requiring high-frequency secure communications.
-The use of PSK authentication in EDHOC ensures that session key can be refreshed without heavy computational overhead, typically associated with public key operations, thus optimizing both performance and security.
-
+Section 3 provides an overview of the PSK method flow and credentials. Section 4 outlines the changes to key derivation compared to {{RFC9528}}, Section 5 details message formatting and processing, and Section 6 discusses security considerations. How to derive keys for resumption is described in Section TODO.
 
 # Conventions and Definitions
 
