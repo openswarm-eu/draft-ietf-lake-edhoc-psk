@@ -2,16 +2,16 @@
 
 This is the working area for the individual Internet-Draft, "EDHOC PSK authentication".
 
-* [Editor's Copy](https://ElsaLopez133.github.io/draft-lopez-lake-edhoc-psk/#go.draft-lopez-lake-edhoc-psk.html)
-* [Datatracker Page](https://datatracker.ietf.org/doc/draft-lopez-lake-edhoc-psk)
-* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-lopez-lake-edhoc-psk)
-* [Compare Editor's Copy to Individual Draft](https://ElsaLopez133.github.io/draft-lopez-lake-edhoc-psk/#go.draft-lopez-lake-edhoc-psk.diff)
-
+* [Editor's Copy HTML](https://lake-wg.github.io/psk/#go.draft-ietf-lake-edhoc-psk.html)
+* [Editor's Copy Text](https://lake-wg.github.io/psk/#go.draft-ietf-lake-edhoc-psk.txt)
+* [Datatracker Page](https://datatracker.ietf.org/doc/draft-ietf-lake-edhoc-psk/)
+* [Working Group Draft](https://datatracker.ietf.org/doc/html/draft-ietf-lake-edhoc-psk)
+* [Compare Editor's Copy to Individual Draft](https://lake-wg.github.io/psk/#go.draft-ietf-lake-edhoc-psk.diff)
 
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/ElsaLopez133/draft-lopez-lake-edhoc-psk/blob/main/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/lake-wg/psk/blob/main/CONTRIBUTING.md).
 
 Contributions can be made by creating pull requests.
 The GitHub interface supports creating pull requests using the Edit (✏) button.
