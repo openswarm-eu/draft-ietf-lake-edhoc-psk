@@ -252,7 +252,7 @@ Compared to {{RFC9528}}, a fourth message does not only provide key confirmation
 After verifying message_4, the Initiator is assured that the Responder has calculated the key PRK_out (key confirmation) and that no other party can derive the key. The Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
 
 # Security Considerations
-  
+
 PSK authentication method introduces changes with respect to the current specification of EDHOC {{RFC9528}}. This section analyzes the security implications of these changes.
 
 ## Identity protection
@@ -267,7 +267,7 @@ Authentication in EDHOC-PSK depends on the security of the session key and the p
 
 Similarly to {{RFC9528}}, EDHOC-PSK provides external authorization data protection. The integrity and confidentiality of EAD fields follow the same security guarantees as in the original EDHOC specification.
 
-## PSK usage for Session Resumtpion 
+## PSK usage for Session Resumtpion
 
 This section defines how PSKs are used for session resumption in EDHOC. We can distinguish between two types of resumption PSKs:
 
