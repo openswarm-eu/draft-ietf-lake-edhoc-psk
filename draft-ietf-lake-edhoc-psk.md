@@ -252,29 +252,58 @@ Compared to {{RFC9528}}, a fourth message does not only provide key confirmation
 After verifying message_4, the Initiator is assured that the Responder has calculated the key PRK_out (key confirmation) and that no other party can derive the key. The Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
 
 # Security Considerations
+  
+PSK authentication method introduces changes with respect to the current specification of EDHOC {{RFC9528}}. This section analyzes the security implications of these changes.
 
-When evaluating the security considerations, it is important to differentiate between the initial handshake and session resumption phases.
+## Identity protection
 
-  1. **Initial Handshake**: a fresh CRED_PSK is used to establish a secure connection.
-  2. **Session Resumption**: the same PSK identifier (ID_CRED_PSK) is reused each time EDHOC is executed.
-    While this enhances efficiency and reduces the overhead of key exchanges, it presents privacy risks if not managed properly.
-    Over multiple resumption sessions, initiating a full EDHOC session changes the resumption PSK, resulting in a new ID_CRED_PSK.
-    The periodic renewal of the CRED_PSK and ID_CRED_PSK helps mitigate long-term privacy risks associated with static key identifiers.
+EDHOC-PSK encrypts ID_CRED_PSK in message 3, XOR encrypted with a keystream derived from the ephemeral shared secret G_XY. As a consequence, contrary to the current EDHOC methods that protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See [Section 9.1 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-9.1)), EDHOC-PSK provides identity protection for both the Initator and the Responder against passive attackers.
 
-## Identity Protection
+## Mutual Authentication
 
-The current EDHOC methods protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See [Section 9.1 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-9.1)).
-With EDHOC-PSK authentication method, both the Initiator's and Responder's identities are protected against passive attackers, but not against active attackers.
+Authentication in EDHOC-PSK depends on the security of the session key and the protocol's confidentiality. Both security properties hold as long as the PSK remains secret. Even though the foruth message (message_4) remains optional, mutual authentication is not guaranteed without it, or without an OSCORE message or any application data that confirms that the Responder owns the PSK. When message_4 is included, the protocol achieves explicit key confirmation in addition to mutual authentication.
 
-## Number of Messages
+## External Authorization Data Protection
 
-The current EDHOC protocol consists of three mandatory messages and an optional fourth message.
-In the case of EDHOC-PSK authentication method, message_4 remains optional, but mutual authentication is not guaranteed without it, or an OSCORE message or any application data that confirms that the Responder owns the PSK. Additionally, with this fourth message the protocol achieves explicit key confirmation in addition to mutual authentication.
+Similarly to {{RFC9528}}, EDHOC-PSK provides external authorization data protection. The integrity and confidentiality of EAD fields follow the same security guarantees as in the original EDHOC specification.
 
-## External Authorization Data
+## PSK usage for Session Resumtpion 
 
-The Initiator and Responder can send information in EAD_3 and EAD_4 or in OSCORE messages in parallel with message_3 and message_4.
-This is possible because the Initiator knows that only the Responder with access to the CRED_PSK can decrypt the information.
+This section defines how PSKs are used for session resumption in EDHOC. We can distinguish between two types of resumption PSKs:
+
+  - External PSK: a PSK established out-of-band and used for the initial handshake.
+  - Ressumption PSK: a key derived from a previous EDHOC session specifically for resumption purposes.
+
+### Ciphersuite requirements for resumption
+
+When using a resumption PSK derived from a previous EDHOC exchange:
+
+  1. The resumption PSK MUST only be used with the same ciphersuite that was used in the original EDHOC exchange, or with a ciphersuite that provides equal or higher security guarantees.
+  2. Implmentations SHOULD manitain a mapping between the resumption PSK and its originating ciphersuite to enforce this requirement.
+  3. If a resumption PSK is offered with a weaker ciphersuite than its original exchange, the recipient MUST reject the connection attempt.
+
+### Privacy Considerations for Resumption
+
+When using resumption PSKs:
+
+  - The same ID_CRED_PSK is reused each time EDHOC is executed with a specific resumption PSK.
+  - To prevent long-term tracking, implementations SHOULD periodically initiate a full EDHOC exchange to generate a new resumption PSK and corresponding ID_CRED_PSK.
+
+While PSK reuse enhances efficiency by reducing the overhead of key exchanges, it presents privacy risks if not managed properly through periodic renewal.
+
+### Security Considerations for Resumption
+
+- Resumption PSKs MUST NOT be used for purposes other than EDHOC session resumption.
+- Resumption PSKs MUST be securely stored with the same level of protection as the original session keys.
+- Parties SHOULD implement mechanisms to detect and prevent excessive reuse of the same resumption PSK.
+
+
+## Post Quantum Considerations
+
+Recent achievements in developing quantum computers demonstrate that it is probably feasible to build one that is cryptographically significant. If such a computer is implemented, many of the cryptographic algorithms and protocols currently in use would be insecure. A quantum computer would be able to solve Diffie-Hellman (DH) and Elliptic Curve Diffie-Hellman (ECDH) problems in polynomial time.
+
+EDCHOC with pre-shared keys would not be vulnerable to quantum attacks because those keys are used as inputs to the key derivation function. The use of intermediate keys derived through key derivation functions ensure that the message is not immediately compromised if the symmetrically distributed key (PSK) is compromised, or if the algorithm used to distribute keys asymmetrically (DH) is broken. If the pre-shared key has sufficient entropy and the Key Derivation Function (KDF), encryption, and authentication transforms are quantum secure, then the resulting system is believed to be quantum secure.
+Therefore, provided that the PSK remains secret, EDHOC-PSK provides confidentiality, mutual authentication and Perfect Forward Secrecy (PFS) even in the presence of quantum attacks. What is more, the key exchange is still a key agreement where both parties contribute with randomness.
 
 ## Independence of Session Keys
 
@@ -294,13 +323,12 @@ This change ensures that key materials are only stored once their integrity and 
 Lastly, whether the Initiator or Responder authenticates first is not relevant when using symmetric keys.
 This consideration was important for the privacy properties when using asymmetric authentication but is not significant in the context of symmetric key usage.
 
-# Privacy Considerations
-
 # IANA Considerations
 
 This document has IANA actions.
 
 ## EDHOC Method Type Registry
+
 
 ## EDHOC Exporter Label Registry
 
