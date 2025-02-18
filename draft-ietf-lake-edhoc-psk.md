@@ -329,10 +329,49 @@ This document has IANA actions.
 
 ## EDHOC Method Type Registry
 
+IANA is requested to register the following entry in the "EDHOC Method Type" registry under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
+
+~~~~~~~~~~~ aasvg
++------------+------------------------------+---------------------------------+-------------------+
+| Value      | Initiator Authentication Key | Responder Authentication Key    | Reference         |
++============+==============================+=================================+===================+
+|  4         |                 PSK          |                 PSK             |                   |
++------------+------------------------------+---------------------------------+-------------------+
+
+~~~~~~~~~~~
+{: #fig-method-psk title="Addition to the EDHOC Method Type Registry."}
 
 ## EDHOC Exporter Label Registry
 
+IANA is requested to register the following entry in the "EDHOC Exporter Label" registry under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
+
+~~~~~~~~~~~ aasvg
++------------+------------------------------+-------------------+
+| Label      | Descritpion                  |  Reference        |
++============+==============================+===================+
+|            |                              |                   |
++------------+------------------------------+-------------------+
+
+~~~~~~~~~~~
+{: #fig-exporter-psk title="Addition to the EDHOC Exporter Label Registry."}
+
 ## EDHOC Info Label Registry
+
+IANA is requested to register the following registry "EDHOC Info Label" under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
+
+~~~~~~~~~~~ aasvg
++------------+-----------------------+-------------------+
+| Label      |          Key          |  Reference        |
++============+=======================+===================+
+|  10        |       KEYSTREAM_3     |   {{key-der}}     |
++------------+-----------------------+-------------------+
+|  11        |           K_3         |   {{key-der}}     |
++------------+-----------------------+-------------------+
+|  12        |          IV_3         |   {{key-der}}     |
++------------+-----------------------+-------------------+
+
+~~~~~~~~~~~
+{: #fig-info-label-psk title="EDHOC Info Label Registry."}
 
 --- back
 
