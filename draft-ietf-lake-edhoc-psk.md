@@ -393,11 +393,11 @@ RFC Editor: Please remove this appendix.
 
 * From -01 to -02
 
-  * TODO
-
+  * Changes to message_3 formatting and processing
+ 
 * From -00 to -01
 
-  * TODO
+  * Editorial changes and corrections
 
 # Acknowledgments
 {:numbered="false"}
