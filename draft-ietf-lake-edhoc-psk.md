@@ -276,10 +276,6 @@ In the case of EDHOC-PSK authentication method, message_4 remains optional, but 
 The Initiator and Responder can send information in EAD_3 and EAD_4 or in OSCORE messages in parallel with message_3 and message_4.
 This is possible because the Initiator knows that only the Responder with access to the CRED_PSK can decrypt the information.
 
-## Attacks
-
-EDHOC-PSK authentication method offers privacy and resistance to passive attacks but might be vulnerable to certain active attacks due to delayed authentication.
-
 ## Independence of Session Keys
 
 NIST mandates that that an ephemeral private key shall be used in exactly one key-establishment transaction (see Section 5.6.3.3 of {{SP-800-56A}}). This requirement is essential for preserving session key independence and ensuring forward secrecy. The EDHOC protocol complies with this NIST requirement.
