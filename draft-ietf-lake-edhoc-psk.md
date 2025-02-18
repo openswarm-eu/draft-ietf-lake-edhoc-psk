@@ -280,7 +280,7 @@ This is possible because the Initiator knows that only the Responder with access
 
 EDHOC-PSK authentication method offers privacy and resistance to passive attacks but might be vulnerable to certain active attacks due to delayed authentication.
 
-# Independence of Session Keys
+## Independence of Session Keys
 
 NIST mandates that that an ephemeral private key shall be used in exactly one key-establishment transaction (see Section 5.6.3.3 of {{SP-800-56A}}). This requirement is essential for preserving session key independence and ensuring forward secrecy. The EDHOC protocol complies with this NIST requirement.
 
@@ -385,7 +385,11 @@ RFC Editor: Please remove this appendix.
 
 * From -02 to -03
 
-  * TODO
+  * Updated abstract and Introduction
+  * Changed message_3 to hide the identity lenght from passive attackers
+  * CDDL Definitions
+  * Security considerations of independence of Session Keys
+  * Editorial changes
 
 * From -01 to -02
 
