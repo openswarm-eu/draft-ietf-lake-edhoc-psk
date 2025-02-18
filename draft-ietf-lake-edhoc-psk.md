@@ -282,9 +282,7 @@ NIST mandates that that an ephemeral private key shall be used in exactly one ke
 
 In other protocols, the reuse of ephemeral keys, particularly when combined with implementation flaws such as the absence of public key validation, has resulted in critical security vulnerabilities. Such weaknesses have allowed attackers to recover the so called “ephemeral” private key from a compromised session, thereby enabling them to compromise the security of both past and future sessions between legitimate parties. Assuming breach and minimizing the impact of compromise are fundamental zero-trust principles.
 
-# Privacy Considerations
-
-# Unified Approach and Recommendations
+## Unified Approach and Recommendations
 
 For use cases involving the transmission of application data, application data can be sent concurrently with message_3, maintaining the protocol's efficiency.
 In applications such as EAP-EDHOC, where application data is not sent, message_4 is mandatory. Thus, EDHOC-PSK authentication method does not include any extra messages.
@@ -295,6 +293,8 @@ This change ensures that key materials are only stored once their integrity and 
 
 Lastly, whether the Initiator or Responder authenticates first is not relevant when using symmetric keys.
 This consideration was important for the privacy properties when using asymmetric authentication but is not significant in the context of symmetric key usage.
+
+# Privacy Considerations
 
 # IANA Considerations
 
