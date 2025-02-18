@@ -47,6 +47,23 @@ normative:
   RFC8949:
   RFC8610:
   RFC8392:
+  SP-800-56A:
+    target: https://doi.org/10.6028/NIST.SP.800-56Ar3
+    title: Recommendation for Pair-Wise Key-Establishment Schemes Using Discrete Logarithm Cryptography
+    seriesinfo:
+      "NIST": "Special Publication 800-56A Revision 3"
+    author:
+      -
+        ins: E. Barker
+      -
+        ins: L. Chen
+      -
+        ins: A. Roginsky
+      -
+        ins: A. Vassilev
+      -
+        ins: R. Davis
+    date: April 2018
 
 informative:
 
@@ -262,6 +279,12 @@ This is possible because the Initiator knows that only the Responder with access
 ## Attacks
 
 EDHOC-PSK authentication method offers privacy and resistance to passive attacks but might be vulnerable to certain active attacks due to delayed authentication.
+
+# Independence of Session Keys
+
+NIST mandates that that an ephemeral private key shall be used in exactly one key-establishment transaction (see Section 5.6.3.3 of {{SP-800-56A}}). This requirement is essential for preserving session key independence and ensuring forward secrecy. The EDHOC protocol complies with this NIST requirement.
+
+In other protocols, the reuse of ephemeral keys, particularly when combined with implementation flaws such as the absence of public key validation, has resulted in critical security vulnerabilities. Such weaknesses have allowed attackers to recover the so called “ephemeral” private key from a compromised session, thereby enabling them to breach the security of subsequent sessions between legitimate parties. Assuming breach and minimizing the impact of compromise are fundamental zero-trust principles.
 
 # Privacy Considerations
 
