@@ -1,5 +1,5 @@
 ---
-title: "EDHOC with Pre-Shared Key (PSK) Authentication"
+title: "EDHOC Authenticated with Pre-Shred Keys (PSK)"
 docname: draft-ietf-lake-edhoc-psk-latest
 category: std
 
@@ -267,37 +267,6 @@ Authentication in EDHOC-PSK depends on the security of the session key and the p
 
 Similarly to {{RFC9528}}, EDHOC-PSK provides external authorization data protection. The integrity and confidentiality of EAD fields follow the same security guarantees as in the original EDHOC specification.
 
-## PSK usage for Session Resumtpion
-
-This section defines how PSKs are used for session resumption in EDHOC. We can distinguish between two types of resumption PSKs:
-
-  - External PSK: a PSK established out-of-band and used for the initial handshake.
-  - Ressumption PSK: a key derived from a previous EDHOC session specifically for resumption purposes.
-
-### Ciphersuite requirements for resumption
-
-When using a resumption PSK derived from a previous EDHOC exchange:
-
-  1. The resumption PSK MUST only be used with the same ciphersuite that was used in the original EDHOC exchange, or with a ciphersuite that provides equal or higher security guarantees.
-  2. Implmentations SHOULD manitain a mapping between the resumption PSK and its originating ciphersuite to enforce this requirement.
-  3. If a resumption PSK is offered with a weaker ciphersuite than its original exchange, the recipient MUST reject the connection attempt.
-
-### Privacy Considerations for Resumption
-
-When using resumption PSKs:
-
-  - The same ID_CRED_PSK is reused each time EDHOC is executed with a specific resumption PSK.
-  - To prevent long-term tracking, implementations SHOULD periodically initiate a full EDHOC exchange to generate a new resumption PSK and corresponding ID_CRED_PSK.
-
-While PSK reuse enhances efficiency by reducing the overhead of key exchanges, it presents privacy risks if not managed properly through periodic renewal.
-
-### Security Considerations for Resumption
-
-- Resumption PSKs MUST NOT be used for purposes other than EDHOC session resumption.
-- Resumption PSKs MUST be securely stored with the same level of protection as the original session keys.
-- Parties SHOULD implement mechanisms to detect and prevent excessive reuse of the same resumption PSK.
-
-
 ## Post Quantum Considerations
 
 Recent achievements in developing quantum computers demonstrate that it is probably feasible to build one that is cryptographically significant. If such a computer is implemented, many of the cryptographic algorithms and protocols currently in use would be insecure. A quantum computer would be able to solve Diffie-Hellman (DH) and Elliptic Curve Diffie-Hellman (ECDH) problems in polynomial time.
@@ -323,6 +292,40 @@ This change ensures that key materials are only stored once their integrity and 
 Lastly, whether the Initiator or Responder authenticates first is not relevant when using symmetric keys.
 This consideration was important for the privacy properties when using asymmetric authentication but is not significant in the context of symmetric key usage.
 
+# PSK usage for Session Resumtpion
+
+This section defines how PSKs are used for session resumption in EDHOC.
+Each time EDHOC-PSK is run a new PRK_out and PRK_exporter will be generated.
+Following [Section 4.2 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-4.2), EDHOC_Exporter can be used to derive both CRED_PSK and ID_CRED_PSK:
+
+~~~~~~~~~~~~
+CRED_PSK = EDHOC_Exporter( 2, h'', resumption_psk_length )
+ID_CRED_PSK = EDHOC_Exporter( 3, h'', id_cred_psk_length )
+~~~~~~~~~~~~
+
+## Ciphersuite Requirements for Resumption
+
+When using a resumption PSK derived from a previous EDHOC exchange:
+
+  1. The resumption PSK MUST only be used with the same ciphersuite that was used in the original EDHOC exchange, or with a ciphersuite that provides equal or higher security guarantees.
+  2. Implmentations SHOULD manitain a mapping between the resumption PSK and its originating ciphersuite to enforce this requirement.
+  3. If a resumption PSK is offered with a weaker ciphersuite than its original exchange, the recipient MUST reject the connection attempt.
+
+## Privacy Considerations for Resumption
+
+When using resumption PSKs:
+
+  - The same ID_CRED_PSK is reused each time EDHOC is executed with a specific resumption PSK.
+  - To prevent long-term tracking, implementations SHOULD periodically initiate a full EDHOC exchange to generate a new resumption PSK and corresponding ID_CRED_PSK. Alternatively, as stated in [Appendix H of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#appendix-h), EDHOC_KeyUpdate can be used to derive a new PRK_out, and consequently a new CRED_PSK and ID_CRED_PSK for session resumption.
+
+While PSK reuse enhances efficiency by reducing the overhead of key exchanges, it presents privacy risks if not managed properly through periodic renewal.
+
+## Security Considerations for Resumption
+
+- Resumption PSKs MUST NOT be used for purposes other than EDHOC session resumption.
+- Resumption PSKs MUST be securely stored with the same level of protection as the original session keys.
+- Parties SHOULD implement mechanisms to detect and prevent excessive reuse of the same resumption PSK.
+
 # IANA Considerations
 
 This document has IANA actions.
@@ -346,11 +349,13 @@ IANA is requested to register the following entry in the "EDHOC Method Type" reg
 IANA is requested to register the following entry in the "EDHOC Exporter Label" registry under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
 
 ~~~~~~~~~~~ aasvg
-+------------+------------------------------+-------------------+
-| Label      | Descritpion                  |  Reference        |
-+============+==============================+===================+
-|            |                              |                   |
-+------------+------------------------------+-------------------+
++------------+------------------------------+-------------------+-------------------+
+| Label      | Descritpion                  | Change Controller | Reference         |
++============+==============================+===================+===================+
+|  2         | Resumption CRED_PSK          |       IETF        |                   |
++------------+------------------------------+-------------------+-------------------+
+|  3         | Resumption ID_CRED_PSK       |       IETF        |                   |
++------------+------------------------------+-------------------+-------------------+
 
 ~~~~~~~~~~~
 {: #fig-exporter-psk title="Addition to the EDHOC Exporter Label Registry."}
@@ -363,11 +368,11 @@ IANA is requested to register the following registry "EDHOC Info Label" under th
 +------------+-----------------------+-------------------+
 | Label      |          Key          |  Reference        |
 +============+=======================+===================+
-|  10        |       KEYSTREAM_3     |   {{key-der}}     |
+|  12        |       KEYSTREAM_3     |   {{key-der}}     |
 +------------+-----------------------+-------------------+
-|  11        |           K_3         |   {{key-der}}     |
+|  13        |           K_3         |   {{key-der}}     |
 +------------+-----------------------+-------------------+
-|  12        |          IV_3         |   {{key-der}}     |
+|  14        |          IV_3         |   {{key-der}}     |
 +------------+-----------------------+-------------------+
 
 ~~~~~~~~~~~
