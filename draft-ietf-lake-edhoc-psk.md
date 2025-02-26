@@ -231,6 +231,8 @@ Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 
       * If ID_CRED_PSK contains a single 'kid' parameter, i.e., ID_CRED_PSK = { 4 : kid_PSK }, then the compact encoding is applied, see {{Section 3.5.3.2 of RFC9528}}.
 
+      * If the length of PLAINTEXT_3A exceeds the output of EDHOC_KDF, then {{Appendix G of RFC9528}} applies.
+
    * Compute KEYSTREAM_3 as in {{key-der}}, where plaintext_length is the length of PLAINTEXT_3A. For the case of plaintext_length exceeding the EDHOC_KDF output size, see {{Appendix G of RFC9528}}.
 
    * CIPHERTEXT_3 = PLAINTEXT_3A XOR KEYSTREAM_3
@@ -260,7 +262,7 @@ PSK authentication method introduces changes with respect to the current specifi
 
 ## Identity protection
 
-EDHOC-PSK encrypts ID_CRED_PSK in message 3, XOR encrypted with a keystream derived from the ephemeral shared secret G_XY. As a consequence, contrary to the current EDHOC methods that protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See [Section 9.1 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-9.1)), EDHOC-PSK provides identity protection for both the Initator and the Responder against passive attackers.
+EDHOC-PSK encrypts ID_CRED_PSK in message 3, XOR encrypted with a keystream derived from the ephemeral shared secret G_XY. As a consequence, contrary to the current EDHOC methods that protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See {{Section 9.1 of RFC9528}}), EDHOC-PSK provides identity protection for both the Initator and the Responder against passive attackers.
 
 ## Mutual Authentication
 
@@ -295,11 +297,11 @@ This change ensures that key materials are only stored once their integrity and 
 Lastly, whether the Initiator or Responder authenticates first is not relevant when using symmetric keys.
 This consideration was important for the privacy properties when using asymmetric authentication but is not significant in the context of symmetric key usage.
 
-# PSK usage for Session Resumtpion
+# PSK usage for Session Resumtpion {#psk-resumption}
 
 This section defines how PSKs are used for session resumption in EDHOC.
 Each time EDHOC-PSK is run a new PRK_out and PRK_exporter will be generated.
-Following [Section 4.2 of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#section-4.2), EDHOC_Exporter can be used to derive both CRED_PSK and ID_CRED_PSK:
+Following {{Section 4.2 of RFC9528}}, EDHOC_Exporter can be used to derive both CRED_PSK and ID_CRED_PSK:
 
 ~~~~~~~~~~~~
 CRED_PSK = EDHOC_Exporter( 2, h'', resumption_psk_length )
@@ -319,7 +321,7 @@ When using a resumption PSK derived from a previous EDHOC exchange:
 When using resumption PSKs:
 
   - The same ID_CRED_PSK is reused each time EDHOC is executed with a specific resumption PSK.
-  - To prevent long-term tracking, implementations SHOULD periodically initiate a full EDHOC exchange to generate a new resumption PSK and corresponding ID_CRED_PSK. Alternatively, as stated in [Appendix H of RFC9528](https://www.rfc-editor.org/rfc/rfc9528.html#appendix-h), EDHOC_KeyUpdate can be used to derive a new PRK_out, and consequently a new CRED_PSK and ID_CRED_PSK for session resumption.
+  - To prevent long-term tracking, implementations SHOULD periodically initiate a full EDHOC exchange to generate a new resumption PSK and corresponding ID_CRED_PSK. Alternatively, as stated in {{Appendix H of RFC9528}}, EDHOC_KeyUpdate can be used to derive a new PRK_out, and consequently a new CRED_PSK and ID_CRED_PSK for session resumption.
 
 While PSK reuse enhances efficiency by reducing the overhead of key exchanges, it presents privacy risks if not managed properly through periodic renewal.
 
@@ -355,9 +357,9 @@ IANA is requested to register the following entry in the "EDHOC Exporter Label" 
 +------------+------------------------------+-------------------+-------------------+
 | Label      | Descritpion                  | Change Controller | Reference         |
 +============+==============================+===================+===================+
-|  2         | Resumption CRED_PSK          |       IETF        |                   |
+|  2         | Resumption CRED_PSK          |       IETF        | Section 7         |
 +------------+------------------------------+-------------------+-------------------+
-|  3         | Resumption ID_CRED_PSK       |       IETF        |                   |
+|  3         | Resumption ID_CRED_PSK       |       IETF        | Section 7         |
 +------------+------------------------------+-------------------+-------------------+
 
 ~~~~~~~~~~~
@@ -371,11 +373,11 @@ IANA is requested to register the following registry "EDHOC Info Label" under th
 +------------+-----------------------+-------------------+
 | Label      |          Key          |  Reference        |
 +============+=======================+===================+
-|  12        |       KEYSTREAM_3     |   {{key-der}}     |
+|  12        |       KEYSTREAM_3     |   Section 4       |
 +------------+-----------------------+-------------------+
-|  13        |           K_3         |   {{key-der}}     |
+|  13        |           K_3         |   Section 4       |
 +------------+-----------------------+-------------------+
-|  14        |          IV_3         |   {{key-der}}     |
+|  14        |          IV_3         |   Section 4       |
 +------------+-----------------------+-------------------+
 
 ~~~~~~~~~~~
