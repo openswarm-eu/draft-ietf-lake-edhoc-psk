@@ -12,6 +12,7 @@ consensus: true
 v: 3
 area: Security
 workgroup: LAKE Working Group
+cat: std
 venue:
   group: LAKE
   type: Working Group
@@ -69,7 +70,7 @@ informative:
 
 --- abstract
 
-This document specifies a Pre-Shared Key (PSK) authentication method for the Ephemeral Diffie-Hellman Over COSE (EDHOC) key exchange protocol. The PSK method enhances computational efficiency while providing mutual authentication, ephemeral key exchange, identity protection, and quantum resistance. It is particularly suited for systems where nodes share a PSK out-of-band and enables efficient session resumption with less computational overhead. This document details the PSK method flow, key derivation changes, message formatting, processing, and security considerations.
+This document specifies a Pre-Shared Key (PSK) authentication method for the Ephemeral Diffie-Hellman Over COSE (EDHOC) key exchange protocol. The PSK method enhances computational efficiency while providing mutual authentication, ephemeral key exchange, identity protection, and quantum resistance. It is particularly suited for systems where nodes share a PSK provided out-of-band (external PSK) and enables efficient session resumption with less computational overhead when the PSK is provided from a previous EDHOC session (resumption PSK). This document details the PSK method flow, key derivation changes, message formatting, processing, and security considerations.
 
 --- middle
 
@@ -77,9 +78,11 @@ This document specifies a Pre-Shared Key (PSK) authentication method for the Eph
 
 This document defines a Pre-Shared Key (PSK) authentication method for the Ephemeral Diffie-Hellman Over COSE (EDHOC) key exchange protocol {{RFC9528}}. The PSK method balances the complexity of credential distribution with computational efficiency. While symmetrical key distribution is more complex than asymmetrical approaches, PSK authentication offers greater computational efficiency compared to the methods outlined in {{RFC9528}}. The PSK method retains mutual authentication, asymmetric ephemeral key exchange, and identity protection established by {{RFC9528}}.
 
-EDHOC with PSK authentication benefits systems where two nodes nodes share a Pre-Shared Key (PSK) provided out-of-band. This applies to scenarios like the Authenticated Key Management Architecture (AKMA) in mobile systems or the Peer and Authenticator in Extensible Authentication Protocol (EAP) systems. The PSK method enables the nodes to perform ephemeral key exchange, achieving Perfect Forward Secrecy (PFS). This ensures that even if the PSK is compromised, past communications remain secure against active attackers, while future communications are protected from passive attackers. Additionally, by leveraging the PSK for both authentication and key derivation, the method offers quantum resistance key exchange and authentication.
+EDHOC with PSK authentication benefits systems where two nodes nodes share a Pre-Shared Key (PSK) provided out-of-band (external PSK). This applies to scenarios like the Authenticated Key Management Architecture (AKMA) in mobile systems or the Peer and Authenticator in Extensible Authentication Protocol (EAP) systems. The PSK method enables the nodes to perform ephemeral key exchange, achieving Perfect Forward Secrecy (PFS). This ensures that even if the PSK is compromised, past communications remain secure against active attackers, while future communications are protected from passive attackers. Additionally, by leveraging the PSK for both authentication and key derivation, the method offers quantum resistance key exchange and authentication.
 
-Another key use case of PSK authentication in the EDHOC protocol is session resumption. This enables previously connected parties to quickly reestablish secure communication using pre-shared keys from a prior session, reducing the overhead associated with key exchange and asymmetric authentication. By using PSK authentication, EDHOC allows session keys to be refreshed with significantly lower computational overhead compared to public-key authentication.
+Another key use case of PSK authentication in the EDHOC protocol is session resumption. This enables previously connected parties to quickly reestablish secure communication using pre-shared keys from a prior session, reducing the overhead associated with key exchange and asymmetric authentication. By using PSK authentication, EDHOC allows session keys to be refreshed with significantly lower computational overhead compared to public-key authentication. In this case, the PSK is provisioned after the establishment of a previous EDHOC session by using EDHOC_Exporter (resumption PSK). 
+
+Therefore, the external PSK is supposed to be a long-term credential while the resumption PSK is a session key.
 
 Section 3 provides an overview of the PSK method flow and credentials. Section 4 outlines the changes to key derivation compared to {{RFC9528}}, Section 5 details message formatting and processing, and Section 6 discusses security considerations. How to derive keys for resumption is described in Section 7.
 
@@ -95,7 +98,7 @@ In this method, the Pre-Shared Key identifier (ID_CRED_PSK) is sent in message_3
 
 ## Credentials
 
-Initiator and Responder are assumed to have a PSK with good amount of randomness and the requirements that:
+Initiator and Responder are assumed to have a PSK (external PSK or resumption PSK) with good amount of randomness and the requirements that:
 
 - Only the Initiator and the Responder have access to the PSK.
 - The Responder is able to retrieve the PSK using ID_CRED_PSK.
@@ -181,7 +184,7 @@ IV_3        = EDHOC_KDF( PRK_4e3m, 13, TH_3, iv_length )
 where:
 
 - KEYSTREAM_3 is used to encrypt the ID_CRED_PSK in message_3.
-- TH_3 = H( TH_2, PLAINTEXT_2, CRED_PSK )
+- TH_3 = H( TH_2, PLAINTEXT_2 )
 
 Additionally, the definition of the transcript hash TH_4 is modified as:
 
@@ -235,7 +238,7 @@ Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 * CIPHERTEXT_3B is the 'ciphertext' of COSE_Encrypt0 object as defined in {{Section 5.2 and Section 5.3 of RFC9528}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in {{Section 5.2 of RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
   - protected = h''
-  - external_aad = << ID_CRED_PSK, TH_3 >>
+  - external_aad = << ID_CRED_PSK, TH_3, CRED_PSK >>
   - K_3 and IV_3 as defined in {{key-der}}
   - PLAINTEXT_3B = ( ? EAD_3 )
 
