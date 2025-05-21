@@ -461,7 +461,7 @@ info = (
 
 # Test Vectors
 
-## Message_1 
+## message_1
 
 Both endpoints are authenticated with Pre-Shred Keys (METHOD = 4)
 
@@ -482,14 +482,14 @@ The Initiator creates an ephemeral key pair for use with the EDHOC key exchange 
 ~~~~~~~~~~~~
 Initiator's ephemeral private key
 X (Raw Value) (32 bytes)
-09 97 2D FE F1 EA AB 92 6E C9 6E 80 05 FE D2 9F 70 FF BF 4E 
+09 97 2D FE F1 EA AB 92 6E C9 6E 80 05 FE D2 9F 70 FF BF 4E
 36 1C 3A 06 1A 7A CD B5 17 0C 10 E5
 ~~~~~~~~~~~~
 
 ~~~~~~~~~~~~
 Initiator's ephemeral public key
 G_X (Raw Value) (32 bytes)
-7E C6 81 02 94 06 02 AA B5 48 53 9B F4 2A 35 99 2D 95 72 49 
+7E C6 81 02 94 06 02 AA B5 48 53 9B F4 2A 35 99 2D 95 72 49
 EB 7F 18 88 40 6D 17 8A 04 C9 12 DB
 ~~~~~~~~~~~~
 
@@ -511,7 +511,7 @@ The Initiator constructs message_1:
 
 ~~~~~~~~~~~~
 message_1 (CBOR Sequence) (37 bytes)
-05 02 58 20 7E C6 81 02 94 06 02 AA B5 48 53 9B F4 2A 35 99 
+05 02 58 20 7E C6 81 02 94 06 02 AA B5 48 53 9B F4 2A 35 99
 2D 95 72 49 EB 7F 18 88 40 6D 17 8A 04 C9 12 DB 0A
 ~~~~~~~~~~~~
 
@@ -524,14 +524,14 @@ The Responder creates an ephemeral key pair for use with the EDHOC key exchange 
 ~~~~~~~~~~~~
 Responder's ephemeral private key
 Y (Raw Value) (32 bytes)
-1E 1C 8F 2D F1 AA 71 10 B3 9F 33 BA 5E A8 DC CF 31 41 1E B3 
+1E 1C 8F 2D F1 AA 71 10 B3 9F 33 BA 5E A8 DC CF 31 41 1E B3
 3D 4F 9A 09 4C F6 51 92 D3 35 A7 A3
 ~~~~~~~~~~~~
 
 ~~~~~~~~~~~~
 Responder's ephemeral public key
 G_Y (Raw Value) (32 bytes)
-ED 15 6A 62 43 E0 AF EC 9E FB AA BC E8 42 9D 5A D5 E4 E1 C4 
+ED 15 6A 62 43 E0 AF EC 9E FB AA BC E8 42 9D 5A D5 E4 E1 C4
 32 F7 6A 6E DE 8F 79 24 7B B9 7D 83
 ~~~~~~~~~~~~
 
@@ -548,13 +548,13 @@ TH_2 = H( G_Y, H(message_1) ), where H(message_1) is:
 
 ~~~~~~~~~~~~
 H(message_1) (CBOR Data Item) (32 bytes)
-22 4F 07 DF 2E 79 D7 38 00 50 E7 41 12 99 89 42 C0 D4 33 06 
+22 4F 07 DF 2E 79 D7 38 00 50 E7 41 12 99 89 42 C0 D4 33 06
 49 6C 39 0E 57 73 4A E8 42 0D 0A 2B
 ~~~~~~~~~~~~
 
 ~~~~~~~~~~~~
 TH_2 (CBOR Data Item) (32 bytes)
-27 6D 5C 44 F8 0E BD A7 CF 00 E0 47 3F E5 9D 10 E6 1C 2A 74 
+27 6D 5C 44 F8 0E BD A7 CF 00 E0 47 3F E5 9D 10 E6 1C 2A 74
 14 4B 87 AA D8 D4 F6 6C 39 7A 05 35
 ~~~~~~~~~~~~
 
@@ -564,7 +564,7 @@ It is computed from G_X and Y or G_Y and X:
 
 ~~~~~~~~~~~~
 G_XY (Raw Value) (ECDH shared secret) (32 bytes)
-2F 4A 79 9A 5A B0 C5 67 22 0C B6 72 08 E6 CF 8F 4C A5 FE 38 
+2F 4A 79 9A 5A B0 C5 67 22 0C B6 72 08 E6 CF 8F 4C A5 FE 38
 5D 1B 11 FD 9A 57 3D 41 60 F3 B0 B2
 ~~~~~~~~~~~~
 
@@ -572,16 +572,16 @@ Then, PRK_2e is calculated as defined in {{Section 4.1.2 of RFC9528}}
 
 ~~~~~~~~~~~~
 PRK_2e (Raw Value) (32 bytes)
-59 A2 15 55 E2 8A 1C CB 05 52 B4 5E 60 81 40 5F 3F 33 94 63 35 E0 
-14 53 A2 C7 7B FD E8 00 0E 04
+59 A2 15 55 E2 8A 1C CB 05 52 B4 5E 60 81 40 5F 3F 33 94 63 35
+E0 14 53 A2 C7 7B FD E8 00 0E 04
 ~~~~~~~~~~~~
 
 Since the Responder authenticates using PSK, PRK_3e2m = PRK_2e.
 
 ~~~~~~~~~~~~
 PRK_3e2m (Raw Value) (32 bytes)
-59 A2 15 55 E2 8A 1C CB 05 52 B4 5E 60 81 40 5F 3F 33 94 63 35 E0 
-14 53 A2 C7 7B FD E8 00 0E 04
+59 A2 15 55 E2 8A 1C CB 05 52 B4 5E 60 81 40 5F 3F 33 94 63 35
+E0 14 53 A2 C7 7B FD E8 00 0E 04
 ~~~~~~~~~~~~
 
 No external authorization data:
@@ -615,7 +615,7 @@ The Responder constructs message_2 as defined in {{Section 5.3.1 of RFC9528}}:
 
 ~~~~~~~~~~~~
 message_2 (CBOR Sequence) (35 bytes)
-58 21 ED 15 6A 62 43 E0 AF EC 9E FB AA BC E8 42 9D 5A D5 E4 
+58 21 ED 15 6A 62 43 E0 AF EC 9E FB AA BC E8 42 9D 5A D5 E4
 E1 C4 32 F7 6A 6E DE 8F 79 24 7B B9 7D 83 34
 ~~~~~~~~~~~~
 
@@ -625,13 +625,13 @@ The Initiator computes PRK_4e3m, as described in Section 4, using SALT_4e3m:
 
 ~~~~~~~~~~~~
 SALT_4e3m (Raw Value) (32 bytes)
-3C 90 D8 EE A2 0E A7 34 41 62 36 1B 76 C2 7F BF 1F 11 FE CA 
+3C 90 D8 EE A2 0E A7 34 41 62 36 1B 76 C2 7F BF 1F 11 FE CA
 F3 8F F7 47 30 B1 12 11 42 74 1F 06
 ~~~~~~~~~~~~
 
 ~~~~~~~~~~~~
 PRK_4e3m (Raw Value) (32 bytes)
-FA B9 D7 69 88 9A 07 F1 93 8D E5 C7 DE 4D FB DF 80 9F B0 73 
+FA B9 D7 69 88 9A 07 F1 93 8D E5 C7 DE 4D FB DF 80 9F B0 73
 56 A8 2E 5A AB 04 91 8F 56 B2 19 BE
 ~~~~~~~~~~~~
 
@@ -641,7 +641,7 @@ TH_3 = H( TH_2, PLAINTEXT_2 )
 
 ~~~~~~~~~~~~
 TH_3 (CBOR Data Item) (32 bytes)
-A5 0B 64 8C E2 A6 23 BF C9 72 15 B2 6C 7C EE BD C4 4F 6F 79 
+A5 0B 64 8C E2 A6 23 BF C9 72 15 B2 6C 7C EE BD C4 4F 6F 79
 EF AA BE 27 E8 A0 2A 25 C0 C4 93 CC
 ~~~~~~~~~~~~
 
@@ -707,7 +707,7 @@ TH_4 = H( TH_3, ID_CRED_PSK, ? EAD_3, CRED_PSK )
 
 ~~~~~~~~~~~~
 TH_4 (CBOR Data Item) (32 bytes)
-41 D7 D2 74 D2 23 E4 97 69 6E 1C BB 90 E2 F5 3F AD 2D 48 16 
+41 D7 D2 74 D2 23 E4 97 69 6E 1C BB 90 E2 F5 3F AD 2D 48 16
 48 54 8F BD C7 E5 17 87 BC CD 79 B7
 ~~~~~~~~~~~~
 
@@ -743,16 +743,6 @@ The Responder computes message_4:
 message_4 (CBOR Sequence) (9 bytes)
 48 E5 00 D1 2B BB D1 AE F1
 ~~~~~~~~~~~~
-
-
-
-
-
-
-
-
-
-
 
 # Change Log
 
