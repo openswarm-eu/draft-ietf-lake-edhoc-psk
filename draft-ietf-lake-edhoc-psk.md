@@ -548,7 +548,7 @@ TH_2 = H( G_Y, H(message_1) ), where H(message_1) is:
 
 ~~~~~~~~~~~~
 H(message_1) (CBOR Data Item) (32 bytes)
-19 CC 2D 2A 95 7E DD 80 10 90 42 FD E6 CC 20 C2 4B 6A 34 BC 
+19 CC 2D 2A 95 7E DD 80 10 90 42 FD E6 CC 20 C2 4B 6A 34 BC
 21 C6 D4 9F EA 89 5D 4C 75 92 34 0E
 ~~~~~~~~~~~~
 
@@ -631,7 +631,7 @@ A7 C6 8F ED 7C F9 BB BC A3 83 F0 2B A4 27 45 51 EE DD 07 4A
 
 ~~~~~~~~~~~~
 CRED_PSK (Raw Value) (38 bytes)
-A2 02 68 6D 79 64 6F 74 62 6F 74 08 A1 01 A3 01 04 02 41 10 
+A2 02 68 6D 79 64 6F 74 62 6F 74 08 A1 01 A3 01 04 02 41 10
 20 50 50 93 0F F4 62 A7 7A 35 40 CF 54 63 25 DE A2 14
 ~~~~~~~~~~~~
 
@@ -672,7 +672,7 @@ ID_CRED_PSK (CBOR Sequence) (1 byte)
 
 ~~~~~~~~~~~~
 CRED_PSK (Raw Value) (38 bytes)
-A2 02 68 6D 79 64 6F 74 62 6F 74 08 A1 01 A3 01 04 02 41 10 
+A2 02 68 6D 79 64 6F 74 62 6F 74 08 A1 01 A3 01 04 02 41 10
 20 50 50 93 0F F4 62 A7 7A 35 40 CF 54 63 25 DE A2 14
 ~~~~~~~~~~~~
 
