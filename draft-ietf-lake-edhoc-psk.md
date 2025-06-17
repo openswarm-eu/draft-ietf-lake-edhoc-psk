@@ -324,9 +324,9 @@ To guarantee that both peers share the same resumption key, when a session is ru
 
 When using a resumption PSK derived from a previous EDHOC exchange:
 
-  1. The resumption PSK MUST only be used with the same ciphersuite that was used in the original EDHOC exchange, or with a ciphersuite that provides equal or higher security guarantees.
-  2. Implementations SHOULD maintain a mapping between the resumption PSK and its originating ciphersuite to enforce this requirement.
-  3. If a resumption PSK is offered with a ciphersuite different from the one used in the original EDHOC session, the recipient can fail the present EDHOC session according to application-specific policies.
+  1. The resumption PSK MUST only be used with the same cipher suite that was used in the original EDHOC exchange, or with a cipher suite that provides equal or higher security guarantees.
+  2. Implementations SHOULD maintain a mapping between the resumption PSK and its originating cipher suite to enforce this requirement.
+  3. If a resumption PSK is offered with a cipher suite different from the one used in the original EDHOC session, the recipient can fail the present EDHOC session according to application-specific policies.
 
 ## Privacy Considerations for Resumption
 
@@ -366,7 +366,7 @@ IANA is requested to register the following entry in the "EDHOC Exporter Label" 
 
 ~~~~~~~~~~~ aasvg
 +------------+------------------------------+-------------------+-------------------+
-| Label      | Descritpion                  | Change Controller | Reference         |
+| Label      | Description                  | Change Controller | Reference         |
 +============+==============================+===================+===================+
 |  2         | Resumption CRED_PSK          |       IETF        | Section 7         |
 +------------+------------------------------+-------------------+-------------------+
