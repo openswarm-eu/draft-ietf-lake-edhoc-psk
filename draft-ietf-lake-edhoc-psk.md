@@ -157,7 +157,7 @@ Initiator                                                   Responder
 {: #fig-variant2 title="Overview of Message Flow of PSK." artwork-align="center"}
 
 This approach provides protection against passive attackers for both Initiator and Responder.
-message_4 remains optional, but is needed to authenticate the Responder and achieve mutual authentication in EDHOC if not relaying on external applications, such as OSCORE. With this fourth message, the protocol achieves both explicit key confirmation and mutual authentication.
+message_4 remains optional, but is needed to authenticate the Responder and achieve mutual authentication in EDHOC if not relying on external applications, such as OSCORE. With this fourth message, the protocol achieves both explicit key confirmation and mutual authentication.
 
 # Key Derivation {#key-der}
 
@@ -309,7 +309,7 @@ ID_CRED_PSK = EDHOC_Exporter( 3, h'', id_cred_psk_length )
 
 where:
 
-  - resumption_pks_length is by default, at least, the key_length (length of the encryption key of the EDHOC AEAD algorithm of the selected cipher suite) of the session in which the EDHOC_Exporter is called.
+  - resumption_psk_length is by default, at least, the key_length (length of the encryption key of the EDHOC AEAD algorithm of the selected cipher suite) of the session in which the EDHOC_Exporter is called.
   - id_cred_psk_length is by default 2.
 
 A peer that has successfully completed an EDHOC session, regardless of the used authentication method, MUST generate a resumption key to use for the next resumption in the present "session series", as long as it supports PSK resumption.
@@ -463,7 +463,7 @@ info = (
 
 ## message_1
 
-Both endpoints are authenticated with Pre-Shred Keys (METHOD = 4)
+Both endpoints are authenticated with Pre-Shared Keys (METHOD = 4)
 
 ~~~~~~~~~~~~
 METHOD (CBOR Data Item) (1 byte)
