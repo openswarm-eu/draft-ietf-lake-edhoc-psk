@@ -94,14 +94,14 @@ Readers are expected to be familiar with the terms and concepts described in EDH
 
 # Protocol
 
-In this method, the Pre-Shared Key identifier (ID_CRED_PSK) is sent in message_3. The ID_CRED_PSK allows retrieval of CRED_PSK, a COSE_Key compatible authentication credential that contains the external or resumption PSK. Through this document we will refer to the Pre-Shared Key authentication method as EDHOC-PSK.
+In this method, the Pre-Shared Key identifier (ID_CRED_PSK) is sent in message_3. The ID_CRED_PSK allows retrieval of CRED_PSK, an authentication credential that contains the external or resumption PSK. Through this document we will refer to the Pre-Shared Key authentication method as EDHOC-PSK.
 
 ## Credentials
 
 Initiator and Responder are assumed to have a PSK (external PSK or resumption PSK) with good amount of randomness and the requirements that:
 
 - Only the Initiator and the Responder have access to the PSK.
-- The Responder is able to retrieve the PSK using ID_CRED_PSK.
+- The Responder is able to retrieve CRED_PSK and the PSK, using ID_CRED_PSK.
 
 where:
 
@@ -111,7 +111,7 @@ where:
 ID_CRED_PSK = {4 : h'0f' }
 ~~~~~~~~~~~~
 
-- CRED_PSK is a COSE_Key compatible authentication credential, i.e., a CBOR Web Token (CWT) or CWT Claims Set (CCS) {{RFC8392}} whose 'cnf' claim uses the confirmation method 'COSE_Key' encoding the PSK. For example:
+- CRED_PSK is an authentication credential, e.g., a CBOR Web Token (CWT) or CWT Claims Set (CCS) {{RFC8392}} whose 'cnf' claim uses the confirmation method 'COSE_Key' encoding the PSK. For example:
 
 ~~~~~~~~~~~~
 {                                               /CCS/
@@ -131,10 +131,10 @@ It is RECOMMENDED that it uniquely identifies the CRED_PSK as the recipient migh
 If ID_CRED_PSK contains a single 'kid' parameter, then the compact encoding is applied; see {{Section 3.5.3.2 of RFC9528}}.
 The authentication credential CRED_PSK substitutes CRED_I and CRED_R specified in {{RFC9528}}, and, when applicable, MUST follow the same guidelines described in {{Section 3.5.2 and Section 3.5.3 of RFC9528}}.
 
-## Message Flow of PSK
+## Message Flow of EDHOC-PSK
 
-The ID_CRED_PSK is sent in message_3, encrypted using a key derived from the ephemeral shared secret, G_XY. The Responder authenticates the Initiator first.
-{{fig-variant2}} shows the message flow of PSK authentication method.
+The ID_CRED_PSK is sent in message_3, encrypted using a key derived from the ephemeral shared secret, G_XY, calculated from the Initiator's ephemeral public key G_X and the private key corresponding to the Responder's public key G_Y, or vice verca. The Responder authenticates the Initiator first.
+{{fig-variant2}} shows the message flow of the EDHOC-PSK authentication method.
 
 ~~~~~~~~~~~~ aasvg
 Initiator                                                   Responder
@@ -154,23 +154,31 @@ Initiator                                                   Responder
 |<------------------------------------------------------------------+
 |                             message_4                             |
 ~~~~~~~~~~~~
-{: #fig-variant2 title="Overview of Message Flow of PSK." artwork-align="center"}
+{: #fig-variant2 title="Overview of Message Flow of EDHOC-PSK." artwork-align="center"}
 
 This approach provides protection against passive attackers for both Initiator and Responder.
 message_4 remains optional, but is needed to authenticate the Responder and achieve mutual authentication in EDHOC if not relying on external applications, such as OSCORE. With this fourth message, the protocol achieves both explicit key confirmation and mutual authentication.
 
 # Key Derivation {#key-der}
 
-The pseudorandom keys (PRKs) used for PSK authentication method in EDHOC are derived using EDHOC_Extract, as done in {{RFC9528}}.
+The pseudorandom keys (PRKs) used for the PSK authentication method in EDHOC are derived using EDHOC_Extract, as done in {{RFC9528}}.
 
 ~~~~~~~~~~~~
 PRK  = EDHOC_Extract( salt, IKM )
 ~~~~~~~~~~~~
 
-where the salt and input keying material (IKM) are defined for each key.
-The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in the cipher suite.
+where `salt` and input keying material (`IKM`) are defined for each key.
+The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in the cipher suite, see {{Section 4.1.1 of RFC9528}}.
 
-{{fig-variant2key}} lists the key derivations that differ from those specified in {{Section 4.1.2 of RFC9528}}.
+The transcript hash TH_2 = H( G_Y, H(message_1) ) is defined as in {{Section 5.3.2 of RFC9528}}, the others are modified as specified below.
+
+{{fig-variant2key}} lists the key derivations that differ from those specified in {{Section 4.1.2 of RFC9528}}. The following data is used as in {{RFC9528}}:
+
+- PRK_2e is extracted with
+   - `salt` = TH_2, and
+   - `IKM` = G_XY.
+- KEYSTREAM_2 is derived from PRK_2e and TH_2, see Figure 6 of {{RFC9528}}.
+- SALT_4e3m is derived from PRK_3e2m and TH_3, see Figure 6 of {{RFC9528}}.
 
 ~~~~~~~~~~~~
 PRK_3e2m    = PRK_2e
@@ -179,7 +187,7 @@ KEYSTREAM_3 = EDHOC_KDF( PRK_3e2m, 11, TH_3, plaintext_length_3 )
 K_3         = EDHOC_KDF( PRK_4e3m, 3, TH_3, key_length )
 IV_3        = EDHOC_KDF( PRK_4e3m, 4, TH_3, iv_length )
 ~~~~~~~~~~~~
-{: #fig-variant2key title="Key Derivation of EDHOC PSK Authentication Method." artwork-align="center"}
+{: #fig-variant2key title="Key Derivation of EDHOC-PSK." artwork-align="center"}
 
 where:
 
@@ -258,7 +266,7 @@ After verifying message_4, the Initiator is assured that the Responder has calcu
 
 # Security Considerations
 
-PSK authentication method introduces changes with respect to the current specification of EDHOC {{RFC9528}}. This section analyzes the security implications of these changes.
+The EDHOC-PSK authentication method introduces changes with respect to the current specification of EDHOC {{RFC9528}}. This section analyzes the security implications of these changes.
 
 ## Identity protection
 
@@ -288,7 +296,7 @@ In other protocols, the reuse of ephemeral keys, particularly when combined with
 ## Unified Approach and Recommendations
 
 For use cases involving the transmission of application data, application data can be sent concurrently with message_3, maintaining the protocol's efficiency.
-In applications such as EAP-EDHOC, where application data is not sent, message_4 is mandatory. Thus, EDHOC-PSK authentication method does not include any extra messages.
+In applications such as EAP-EDHOC, where application data is not sent, message_4 is mandatory. Thus, the EDHOC-PSK authentication method does not include any extra messages.
 Other implementations may continue using OSCORE in place of EDHOC message_4, with a required change in the protocol's language to:
       The Initiator SHALL NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message.
 
