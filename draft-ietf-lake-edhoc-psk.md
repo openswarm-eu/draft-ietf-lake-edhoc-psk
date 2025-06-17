@@ -1,5 +1,5 @@
 ---
-title: "EDHOC Authenticated with Pre-Shred Keys (PSK)"
+title: "EDHOC Authenticated with Pre‑Shared Keys (PSK)"
 docname: draft-ietf-lake-edhoc-psk-latest
 category: std
 
@@ -262,7 +262,7 @@ PSK authentication method introduces changes with respect to the current specifi
 
 ## Identity protection
 
-EDHOC-PSK encrypts ID_CRED_PSK in message 3, XOR encrypted with a keystream derived from the ephemeral shared secret G_XY. As a consequence, contrary to the current EDHOC methods that protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See {{Section 9.1 of RFC9528}}), EDHOC-PSK provides identity protection for both the Initator and the Responder against passive attackers.
+EDHOC-PSK encrypts ID_CRED_PSK in message 3, XOR encrypted with a keystream derived from the ephemeral shared secret G_XY. As a consequence, contrary to the current EDHOC methods that protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See {{Section 9.1 of RFC9528}}), EDHOC-PSK provides identity protection for both the Initiator and the Responder against passive attackers.
 
 ## Mutual Authentication
 
@@ -276,7 +276,7 @@ Similarly to {{RFC9528}}, EDHOC-PSK provides external authorization data protect
 
 Recent achievements in developing quantum computers demonstrate that it is probably feasible to build one that is cryptographically significant. If such a computer is implemented, many of the cryptographic algorithms and protocols currently in use would be insecure. A quantum computer would be able to solve Diffie-Hellman (DH) and Elliptic Curve Diffie-Hellman (ECDH) problems in polynomial time.
 
-EDCHOC with pre-shared keys would not be vulnerable to quantum attacks because those keys are used as inputs to the key derivation function. The use of intermediate keys derived through key derivation functions ensure that the message is not immediately compromised if the symmetrically distributed key (PSK) is compromised, or if the algorithm used to distribute keys asymmetrically (DH) is broken. If the pre-shared key has sufficient entropy and the Key Derivation Function (KDF), encryption, and authentication transforms are quantum secure, then the resulting system is believed to be quantum secure.
+EDHOC with pre-shared keys would not be vulnerable to quantum attacks because those keys are used as inputs to the key derivation function. The use of intermediate keys derived through key derivation functions ensure that the message is not immediately compromised if the symmetrically distributed key (PSK) is compromised, or if the algorithm used to distribute keys asymmetrically (DH) is broken. If the pre-shared key has sufficient entropy and the Key Derivation Function (KDF), encryption, and authentication transforms are quantum secure, then the resulting system is believed to be quantum secure.
 Therefore, provided that the PSK remains secret, EDHOC-PSK provides confidentiality, mutual authentication and Perfect Forward Secrecy (PFS) even in the presence of quantum attacks. What is more, the key exchange is still a key agreement where both parties contribute with randomness.
 
 ## Independence of Session Keys
@@ -297,7 +297,7 @@ This change ensures that key materials are only stored once their integrity and 
 Lastly, whether the Initiator or Responder authenticates first is not relevant when using symmetric keys.
 This consideration was important for the privacy properties when using asymmetric authentication but is not significant in the context of symmetric key usage.
 
-# PSK usage for Session Resumtpion {#psk-resumption}
+# PSK usage for Session Resumption {#psk-resumption}
 
 This section defines how PSKs are used for session resumption in EDHOC.
 Following {{Section 4.2 of RFC9528}}, EDHOC_Exporter can be used to derive both CRED_PSK and ID_CRED_PSK:
@@ -320,12 +320,12 @@ To guarantee that both peers share the same resumption key, when a session is ru
     That is, upon receiving EDHOC message_3, the Responder knows for sure that the other peer did derive rPSK_i at the end of the previous session in the "session series", thus making it safe to delete the previous resumption key rPSK_(i-1).
 
 
-## Ciphersuite Requirements for Resumption
+## Cipher Suite Requirements for Resumption
 
 When using a resumption PSK derived from a previous EDHOC exchange:
 
   1. The resumption PSK MUST only be used with the same ciphersuite that was used in the original EDHOC exchange, or with a ciphersuite that provides equal or higher security guarantees.
-  2. Implementations SHOULD manitain a mapping between the resumption PSK and its originating ciphersuite to enforce this requirement.
+  2. Implementations SHOULD maintain a mapping between the resumption PSK and its originating ciphersuite to enforce this requirement.
   3. If a resumption PSK is offered with a ciphersuite different from the one used in the original EDHOC session, the recipient can fail the present EDHOC session according to application-specific policies.
 
 ## Privacy Considerations for Resumption
@@ -701,10 +701,10 @@ CIPHERTEXT_3B (CBOR Sequence) (9 bytes)
 48 D0 A4 37 3C 49 C1 76 9B
 ~~~~~~~~~~~~
 
-The Initiator computes KESYTREAM_3 as defined in Section 4:
+The Initiator computes KEYSTREAM_3 as defined in Section 4:
 
 ~~~~~~~~~~~~
-KESYTREAM_3 (CBOR Sequence) ()
+KEYSTREAM_3 (CBOR Sequence) ()
 D0 1B 7A AD 4C AB BD 14 89 50
 ~~~~~~~~~~~~
 
@@ -715,7 +715,7 @@ PLAINTEXT_3A (CBOR Sequence) (10 bytes)
 10 48 D0 A4 37 3C 49 C1 76 9B
 ~~~~~~~~~~~~
 
-It then uses KESYTREAM_3 to derive CIPHERTEXT_3A:
+It then uses KEYSTREAM_3 to derive CIPHERTEXT_3A:
 
 ~~~~~~~~~~~~
 CIPHERTEXT_3A (CBOR Sequence) (10 bytes)
@@ -778,7 +778,7 @@ RFC Editor: Please remove this appendix.
 * From -02 to -03
 
   * Updated abstract and Introduction
-  * Changed message_3 to hide the identity lenght from passive attackers
+  * Changed message_3 to hide the identity length from passive attackers
   * CDDL Definitions
   * Security considerations of independence of Session Keys
   * Editorial changes
