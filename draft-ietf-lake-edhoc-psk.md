@@ -369,7 +369,7 @@ IANA is requested to register the following entry in the "EDHOC Exporter Label" 
 | Label | Description            | Change Controller | Reference |
 | 2     | Resumption CRED_PSK    | IETF              | Section 7 |
 | 3     | Resumption ID_CRED_PSK | IETF              | Section 7 |
-{: #tab-exporter-psk title="Addition to the EDHOC Exporter Label Registry."}
+{: #tab-exporter-psk title="Additions to the EDHOC Exporter Label Registry."}
 
 --- back
 
