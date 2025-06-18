@@ -372,14 +372,6 @@ IANA is requested to register the following entry in the "EDHOC Exporter Label" 
 | 3     | Resumption ID_CRED_PSK | IETF              | Section 7 |
 {: #tab-exporter-psk title="Addition to the EDHOC Exporter Label Registry."}
 
-## EDHOC Info Label Registry
-
-IANA is requested to register the following registry "EDHOC Info Label" under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
-
-| Label | Key         | Reference |
-| 11    | KEYSTREAM_3 | Section 4 |
-{: #tab-info-label-psk title="EDHOC Info Label Registry."}
-
 --- back
 
 # CDDL Definitions {#CDDL}
