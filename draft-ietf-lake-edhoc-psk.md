@@ -765,6 +765,10 @@ message_4 (CBOR Sequence) (9 bytes)
 
 RFC Editor: Please remove this appendix.
 
+* From -03 to -04
+
+  * Editorial changes
+
 * From -02 to -03
 
   * Updated abstract and Introduction
