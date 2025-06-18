@@ -276,7 +276,7 @@ ID_CRED_PSK = EDHOC_Exporter( 3, h'', id_cred_psk_length )
 
 where:
 
-  - resumption_psk_length is by default, at least, the key_length (length of the encryption key of the EDHOC AEAD algorithm of the selected cipher suite) of the session in which the EDHOC_Exporter is called.
+  - resumption_psk_length is by default the key_length (length of the encryption key of the EDHOC AEAD algorithm of the selected cipher suite) of the session in which the EDHOC_Exporter is called.
   - id_cred_psk_length is by default 2.
 
 A peer that has successfully completed an EDHOC session, regardless of the used authentication method, MUST generate a resumption key to use for the next resumption in the present "session series", as long as it supports PSK resumption.
