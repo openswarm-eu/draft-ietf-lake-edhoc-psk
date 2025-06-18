@@ -265,46 +265,6 @@ Compared to {{RFC9528}}, a fourth message does not only provide key confirmation
 
 After verifying message_4, the Initiator is assured that the Responder has calculated the key PRK_out (key confirmation) and that no other party can derive the key. The Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
 
-# Security Considerations
-
-The EDHOC-PSK authentication method introduces changes with respect to the current specification of EDHOC {{RFC9528}}. This section analyzes the security implications of these changes.
-
-## Identity protection
-
-EDHOC-PSK encrypts ID_CRED_PSK in message 3 with a keystream derived from the ephemeral shared secret G_XY. As a consequence, contrary to the current EDHOC methods that protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See {{Section 9.1 of RFC9528}}), EDHOC-PSK provides identity protection for both the Initiator and the Responder against passive attackers.
-
-## Mutual Authentication
-
-EDHOC-PSK provides mutual authentication, assuming the PSK remains secret. However, if the optional fourth message (message_4) is omitted, mutual authentication is not guaranteed—unless the Responder is later authenticated through an OSCORE message or other application data demonstrating possession of the PSK. When message_4 is included, the protocol ensures both mutual authentication and explicit key confirmation.
-
-## External Authorization Data Protection
-
-Similarly to {{RFC9528}}, EDHOC-PSK provides external authorization data protection. The integrity and confidentiality of EAD fields follow the same security guarantees as in the original EDHOC specification.
-
-## Post Quantum Considerations
-
-Recent advancements in quantum computing suggest that the development of a Cryptographically Relevant Quantum Computer (CRQC) is likely feasible long-term. If realized, such a machine would render many currently deployed asymmetric cryptographic algorithms—such as Elliptic Curve Diffie-Hellman (ECDH)—insecure.
-
-By leveraging a symmetric PSK for both authentication and key derivation, EDHOC-PSK offers quantum-resistant key exchange and authentication. However, if a cryptographically relevant quantum computer (CRQC) is built, the ECDHE component would be broken and contribute only randomness to EDHOC-PSK. As a result, EDHOC-PSK does not provide identity protection or Perfect Forward Secrecy (PFS) against quantum-capable adversaries. If the PSK is compromised, a passive quantum attacker can decrypt both past and future communications.
-
-## Independence of Session Keys
-
-NIST mandates that an ephemeral private key shall be used in exactly one key-establishment transaction (see Section 5.6.3.3 of {{SP-800-56A}}). This requirement is essential for preserving session key independence and ensuring forward secrecy. The EDHOC-PSK protocol complies with this NIST requirement.
-
-In other protocols, the reuse of ephemeral keys, particularly when combined with implementation flaws such as the absence of public key validation, has resulted in critical security vulnerabilities. Such weaknesses have allowed attackers to recover the so called “ephemeral” private key from a compromised session, thereby enabling them to compromise the security of both past and future sessions between legitimate parties. Assuming breach and minimizing the impact of compromise are fundamental zero-trust principles.
-
-## Unified Approach and Recommendations
-
-For use cases involving the transmission of application data, application data can be sent concurrently with message_3, maintaining the protocol's efficiency.
-In applications such as EAP-EDHOC, where application data is not sent, message_4 is mandatory. Thus, the EDHOC-PSK authentication method does not include any extra messages.
-Other implementations may continue using OSCORE in place of EDHOC message_4, with a required change in the protocol's language to:
-      The Initiator SHALL NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message.
-
-This change ensures that key materials are only stored once their integrity and authenticity are confirmed, thereby enhancing privacy by preventing early storage of potentially compromised keys.
-
-Lastly, whether the Initiator or Responder authenticates first is not relevant when using symmetric keys.
-This consideration was important for the privacy properties when using asymmetric authentication but is not significant in the context of symmetric key usage.
-
 # PSK usage for Session Resumption {#psk-resumption}
 
 This section defines how PSKs are used for session resumption in EDHOC.
@@ -350,6 +310,46 @@ When using resumption PSKs:
 - Resumption PSKs MUST be securely stored with the same level of protection as the original session keys.
 - Parties SHOULD implement mechanisms to detect and prevent excessive reuse of the same resumption PSK.
 
+# Security Considerations
+
+The EDHOC-PSK authentication method introduces changes with respect to the current specification of EDHOC {{RFC9528}}. This section analyzes the security implications of these changes.
+
+## Identity protection
+
+EDHOC-PSK encrypts ID_CRED_PSK in message 3 with a keystream derived from the ephemeral shared secret G_XY. As a consequence, contrary to the current EDHOC methods that protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See {{Section 9.1 of RFC9528}}), EDHOC-PSK provides identity protection for both the Initiator and the Responder against passive attackers.
+
+## Mutual Authentication
+
+EDHOC-PSK provides mutual authentication, assuming the PSK remains secret. However, if the optional fourth message (message_4) is omitted, mutual authentication is not guaranteed—unless the Responder is later authenticated through an OSCORE message or other application data demonstrating possession of the PSK. When message_4 is included, the protocol ensures both mutual authentication and explicit key confirmation.
+
+## External Authorization Data Protection
+
+Similarly to {{RFC9528}}, EDHOC-PSK provides external authorization data protection. The integrity and confidentiality of EAD fields follow the same security guarantees as in the original EDHOC specification.
+
+## Post Quantum Considerations
+
+Recent advancements in quantum computing suggest that the development of a Cryptographically Relevant Quantum Computer (CRQC) is likely feasible long-term. If realized, such a machine would render many currently deployed asymmetric cryptographic algorithms—such as Elliptic Curve Diffie-Hellman (ECDH)—insecure.
+
+By leveraging a symmetric PSK for both authentication and key derivation, EDHOC-PSK offers quantum-resistant key exchange and authentication. However, if a cryptographically relevant quantum computer (CRQC) is built, the ECDHE component would be broken and contribute only randomness to EDHOC-PSK. As a result, EDHOC-PSK does not provide identity protection or Perfect Forward Secrecy (PFS) against quantum-capable adversaries. If the PSK is compromised, a passive quantum attacker can decrypt both past and future communications.
+
+## Independence of Session Keys
+
+NIST mandates that an ephemeral private key shall be used in exactly one key-establishment transaction (see Section 5.6.3.3 of {{SP-800-56A}}). This requirement is essential for preserving session key independence and ensuring forward secrecy. The EDHOC-PSK protocol complies with this NIST requirement.
+
+In other protocols, the reuse of ephemeral keys, particularly when combined with implementation flaws such as the absence of public key validation, has resulted in critical security vulnerabilities. Such weaknesses have allowed attackers to recover the so called “ephemeral” private key from a compromised session, thereby enabling them to compromise the security of both past and future sessions between legitimate parties. Assuming breach and minimizing the impact of compromise are fundamental zero-trust principles.
+
+## Unified Approach and Recommendations
+
+For use cases involving the transmission of application data, application data can be sent concurrently with message_3, maintaining the protocol's efficiency.
+In applications such as EAP-EDHOC, where application data is not sent, message_4 is mandatory. Thus, the EDHOC-PSK authentication method does not include any extra messages.
+Other implementations may continue using OSCORE in place of EDHOC message_4, with a required change in the protocol's language to:
+      The Initiator SHALL NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message.
+
+This change ensures that key materials are only stored once their integrity and authenticity are confirmed, thereby enhancing privacy by preventing early storage of potentially compromised keys.
+
+Lastly, whether the Initiator or Responder authenticates first is not relevant when using symmetric keys.
+This consideration was important for the privacy properties when using asymmetric authentication but is not significant in the context of symmetric key usage.
+
 # IANA Considerations
 
 This document has IANA actions.
@@ -370,14 +370,6 @@ IANA is requested to register the following entry in the "EDHOC Exporter Label" 
 | 2     | Resumption CRED_PSK    | IETF              | Section 7 |
 | 3     | Resumption ID_CRED_PSK | IETF              | Section 7 |
 {: #tab-exporter-psk title="Addition to the EDHOC Exporter Label Registry."}
-
-## EDHOC Info Label Registry
-
-IANA is requested to register the following registry "EDHOC Info Label" under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
-
-| Label | Key         | Reference |
-| 11    | KEYSTREAM_3 | Section 4 |
-{: #tab-info-label-psk title="EDHOC Info Label Registry."}
 
 --- back
 
