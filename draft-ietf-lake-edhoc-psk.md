@@ -1,5 +1,6 @@
 ---
 title: "EDHOC Authenticated with Pre‑Shared Keys (PSK)"
+abbrev: EDHOC-PSK
 docname: draft-ietf-lake-edhoc-psk-latest
 category: std
 
