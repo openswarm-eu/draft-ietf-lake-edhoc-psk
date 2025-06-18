@@ -359,45 +359,26 @@ This document has IANA actions.
 
 IANA is requested to register the following entry in the "EDHOC Method Type" registry under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
 
-~~~~~~~~~~~ aasvg
-+------------+------------------------------+---------------------------------+-------------------+
-| Value      | Initiator Authentication Key | Responder Authentication Key    | Reference         |
-+============+==============================+=================================+===================+
-|  4         |                 PSK          |                 PSK             |                   |
-+------------+------------------------------+---------------------------------+-------------------+
-
-~~~~~~~~~~~
-{: #fig-method-psk title="Addition to the EDHOC Method Type Registry."}
+| Value | Initiator Authentication Key | Responder Authentication Key |
+| 4     | PSK                          | PSK                          |
+{: #tab-method-psk title="Addition to the EDHOC Method Type Registry."}
 
 ## EDHOC Exporter Label Registry
 
 IANA is requested to register the following entry in the "EDHOC Exporter Label" registry under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
 
-~~~~~~~~~~~ aasvg
-+------------+------------------------------+-------------------+-------------------+
-| Label      | Description                  | Change Controller | Reference         |
-+============+==============================+===================+===================+
-|  2         | Resumption CRED_PSK          |       IETF        | Section 7         |
-+------------+------------------------------+-------------------+-------------------+
-|  3         | Resumption ID_CRED_PSK       |       IETF        | Section 7         |
-+------------+------------------------------+-------------------+-------------------+
-
-~~~~~~~~~~~
-{: #fig-exporter-psk title="Addition to the EDHOC Exporter Label Registry."}
+| Label | Description            | Change Controller | Reference |
+| 2     | Resumption CRED_PSK    | IETF              | Section 7 |
+| 3     | Resumption ID_CRED_PSK | IETF              | Section 7 |
+{: #tab-exporter-psk title="Addition to the EDHOC Exporter Label Registry."}
 
 ## EDHOC Info Label Registry
 
 IANA is requested to register the following registry "EDHOC Info Label" under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
 
-~~~~~~~~~~~ aasvg
-+------------+-----------------------+-------------------+
-| Label      |          Key          |  Reference        |
-+============+=======================+===================+
-|  11        |       KEYSTREAM_3     |   Section 4       |
-+------------+-----------------------+-------------------+
-
-~~~~~~~~~~~
-{: #fig-info-label-psk title="EDHOC Info Label Registry."}
+| Label | Key         | Reference |
+| 11    | KEYSTREAM_3 | Section 4 |
+{: #tab-info-label-psk title="EDHOC Info Label Registry."}
 
 --- back
 
