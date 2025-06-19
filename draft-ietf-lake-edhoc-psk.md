@@ -94,7 +94,7 @@ Readers are expected to be familiar with the terms and concepts described in EDH
 
 # Protocol
 
-In this method, the Pre-Shared Key identifier (ID_CRED_PSK) is sent in message_3. The ID_CRED_PSK allows retrieval of CRED_PSK, a COSE_Key compatible authentication credential that contains the external or resumption PSK. Through this document we will refer to the Pre-Shared Key authentication method as EDHOC-PSK.
+In this method, the Pre-Shared Key identifier (ID_CRED_PSK), which allows retrieval of the CRED_PSK, is sent in message_3. CRED_PSK is an authentication credential associated with the PSK. Although it may use a COSE_Key representation for compatibility, the format is not restricted to COSE_Key and can vary depending on the implementation. Through this document we will refer to the Pre-Shared Key authentication method as EDHOC-PSK.
 
 ## Credentials
 
@@ -111,7 +111,7 @@ where:
 ID_CRED_PSK = {4 : h'0f' }
 ~~~~~~~~~~~~
 
-- CRED_PSK is a COSE_Key compatible authentication credential, i.e., a CBOR Web Token (CWT) or CWT Claims Set (CCS) {{RFC8392}} whose 'cnf' claim uses the confirmation method 'COSE_Key' encoding the PSK. For example:
+- CRED_PSK is an authentication credential that identifies the PSK. It is often represented as a CBOR Web Token (CWT) or CWT Claims Set (CCS) {{RFC8392}} whose 'cnf' claim uses the confirmation method 'COSE_Key' to carry the PSK. However, other formats for CRED_PSK are also allowed, as long as they enable the recipient to identify and retrieve the correct PSK. An example of CRED_PSK would be:
 
 ~~~~~~~~~~~~
 {                                               /CCS/
