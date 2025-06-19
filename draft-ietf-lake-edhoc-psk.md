@@ -85,7 +85,7 @@ Another key use case of PSK authentication in the EDHOC protocol is session resu
 
 Therefore, the external PSK is supposed to be a long-term credential while the resumption PSK is a session key.
 
-Section 3 provides an overview of the PSK method flow and credentials. Section 4 outlines the changes to key derivation compared to {{RFC9528}}, Section 5 details message formatting and processing, and Section 6 discusses security considerations. How to derive keys for resumption is described in Section 7.
+Section 3 provides an overview of the PSK method flow and credentials. Section 4 outlines the changes to key derivation compared to {{RFC9528}}. Section 5 details message formatting and processing, and Section 6 discusses security considerations. How to derive keys for resumption is described in Section 7.
 
 # Conventions and Definitions
 
@@ -114,8 +114,6 @@ ID_CRED_PSK = {4 : h'0f' }; 4 = 'kid'
 
 The purpose of ID_CRED_PSK is to facilitate retrieval of the correct PSK. It is RECOMMENDED that ID_CRED_PSK uniquely identifies the corresponding CRED_PSK, since ambiguity may require the recipient to try multiple keys.
 
-If ID_CRED_PSK consists of a single 'kid' parameter, the compact encoding defined in {{Section 3.5.3.2 of RFC9528}}, applies. For example, { 4 : h'0f' } may be compactly encoded in the plaintext as the byte string h'0f'.
-
 ### CRED_PSK
 
 CRED_PSK is an authentication credential that identifies and encapsulates the PSK. It substitutes the public-key based credentials CRED_I and CRED_R defined in {{RFC9528}}.
@@ -125,8 +123,6 @@ While CRED_PSK may adopt encoding and representation patterns from {{Section 3.5
 - CRED_PSK contains or identifies a symmetric key, not a public authentication key.
 
 - Authentication is achieved implicitly via the successful use of the PSK to derive keying material and decrypt protected messages.
-
-- Signature-based fields such as Signature_or_MAC are not used.
 
 A common representation of CRED_PSK is a CBOR Web Token (CWT) or CWT Claims Set (CCS) {{RFC8392}} whose 'cnf' claim uses the confirmation method 'COSE_Key' to carry the PSK. An example of CRED_PSK would be:
 
