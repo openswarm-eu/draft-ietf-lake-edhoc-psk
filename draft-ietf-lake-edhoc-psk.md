@@ -1,5 +1,6 @@
 ---
-title: "EDHOC Authenticated with Pre-Shred Keys (PSK)"
+title: "EDHOC Authenticated with Pre‑Shared Keys (PSK)"
+abbrev: EDHOC-PSK
 docname: draft-ietf-lake-edhoc-psk-latest
 category: std
 
@@ -78,7 +79,7 @@ This document specifies a Pre-Shared Key (PSK) authentication method for the Eph
 
 This document defines a Pre-Shared Key (PSK) authentication method for the Ephemeral Diffie-Hellman Over COSE (EDHOC) key exchange protocol {{RFC9528}}. The PSK method balances the complexity of credential distribution with computational efficiency. While symmetrical key distribution is more complex than asymmetrical approaches, PSK authentication offers greater computational efficiency compared to the methods outlined in {{RFC9528}}. The PSK method retains mutual authentication, asymmetric ephemeral key exchange, and identity protection established by {{RFC9528}}.
 
-EDHOC with PSK authentication benefits use cases where two nodes share a Pre-Shared Key (PSK) provided out-of-band (external PSK). This applies to scenarios like the Authenticated Key Management Architecture (AKMA) in mobile systems or the Peer and Authenticator in Extensible Authentication Protocol (EAP) systems. The PSK method enables the nodes to perform ephemeral key exchange, achieving Perfect Forward Secrecy (PFS). This ensures that even if the PSK is compromised, past communications remain secure against active attackers, while future communications are protected from passive attackers. Additionally, by leveraging the PSK for both authentication and key derivation, the method offers quantum resistance key exchange and authentication.
+EDHOC with PSK authentication benefits use cases where two nodes share a Pre-Shared Key (PSK) provided out-of-band (external PSK). This applies to scenarios like the Authenticated Key Management Architecture (AKMA) in mobile systems or the Peer and Authenticator in Extensible Authentication Protocol (EAP) systems. The PSK method enables the nodes to perform ephemeral key exchange, achieving Perfect Forward Secrecy (PFS). This ensures that even if the PSK is compromised, past communications remain secure against active attackers, while future communications are protected from passive attackers. Additionally, by leveraging the PSK for both authentication and key derivation, the method offers quantum resistance key exchange and authentication even when used with ECDHE.
 
 Another key use case of PSK authentication in the EDHOC protocol is session resumption. This enables previously connected parties to quickly reestablish secure communication using pre-shared keys from a prior session, reducing the overhead associated with key exchange and asymmetric authentication. By using PSK authentication, EDHOC allows session keys to be refreshed with significantly lower computational overhead compared to public-key authentication. In this case, the PSK (resumption PSK) is provisioned after the establishment of a previous EDHOC session by using EDHOC_Exporter (resumption PSK).
 
@@ -101,7 +102,7 @@ In this method, the Pre-Shared Key identifier (ID_CRED_PSK), which allows retrie
 Initiator and Responder are assumed to have a PSK (external PSK or resumption PSK) with good amount of randomness and the requirements that:
 
 - Only the Initiator and the Responder have access to the PSK.
-- The Responder is able to retrieve the PSK using ID_CRED_PSK.
+- The Responder is able to retrieve CRED_PSK and the PSK, using ID_CRED_PSK.
 
 where:
 
@@ -131,10 +132,9 @@ It is RECOMMENDED that it uniquely identifies the CRED_PSK as the recipient migh
 If ID_CRED_PSK contains a single 'kid' parameter, then the compact encoding is applied; see {{Section 3.5.3.2 of RFC9528}}.
 The authentication credential CRED_PSK substitutes CRED_I and CRED_R specified in {{RFC9528}}, and, when applicable, MUST follow the same guidelines described in {{Section 3.5.2 and Section 3.5.3 of RFC9528}}.
 
-## Message Flow of PSK
+## Message Flow of EDHOC-PSK
 
-The ID_CRED_PSK is sent in message_3, encrypted using a key derived from the ephemeral shared secret, G_XY. The Responder authenticates the Initiator first.
-{{fig-variant2}} shows the message flow of PSK authentication method.
+The ID_CRED_PSK is sent in message_3, encrypted using a key derived from the ephemeral shared secret, G_XY, calculated from the Initiator's ephemeral public key G_X or from the encapsulation G_Y and the private key corresponding to G_X. When ECDHE is used, the encapsulation G_Y is the Responder's ephemeral public key. The Responder authenticates the Initiator first. {{fig-variant2}} shows the message flow of the EDHOC-PSK authentication method.
 
 ~~~~~~~~~~~~ aasvg
 Initiator                                                   Responder
@@ -154,23 +154,31 @@ Initiator                                                   Responder
 |<------------------------------------------------------------------+
 |                             message_4                             |
 ~~~~~~~~~~~~
-{: #fig-variant2 title="Overview of Message Flow of PSK." artwork-align="center"}
+{: #fig-variant2 title="Overview of Message Flow of EDHOC-PSK." artwork-align="center"}
 
-This approach provides protection against passive attackers for both Initiator and Responder.
-message_4 remains optional, but is needed to authenticate the Responder and achieve mutual authentication in EDHOC if not relaying on external applications, such as OSCORE. With this fourth message, the protocol achieves both explicit key confirmation and mutual authentication.
+This approach provides identity protection against passive attackers for both Initiator and Responder.
+message_4 remains optional, but is needed to authenticate the Responder and achieve mutual authentication in EDHOC if not relying on external applications, such as OSCORE. With this fourth message, the protocol achieves both explicit key confirmation and mutual authentication.
 
 # Key Derivation {#key-der}
 
-The pseudorandom keys (PRKs) used for PSK authentication method in EDHOC are derived using EDHOC_Extract, as done in {{RFC9528}}.
+The pseudorandom keys (PRKs) used for the PSK authentication method in EDHOC are derived using EDHOC_Extract, as done in {{RFC9528}}.
 
 ~~~~~~~~~~~~
 PRK  = EDHOC_Extract( salt, IKM )
 ~~~~~~~~~~~~
 
-where the salt and input keying material (IKM) are defined for each key.
-The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in the cipher suite.
+where `salt` and input keying material (`IKM`) are defined for each key.
+The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in the cipher suite, see {{Section 4.1.1 of RFC9528}}.
 
-{{fig-variant2key}} lists the key derivations that differ from those specified in {{Section 4.1.2 of RFC9528}}.
+The transcript hash TH_2 = H( G_Y, H(message_1) ) is defined as in {{Section 5.3.2 of RFC9528}}, the others are modified as specified below.
+
+{{fig-variant2key}} lists the key derivations that differ from those specified in {{Section 4.1.2 of RFC9528}}. The following data is used as in {{RFC9528}}:
+
+- PRK_2e is extracted with
+   - `salt` = TH_2, and
+   - `IKM` = G_XY.
+- KEYSTREAM_2 is derived from PRK_2e and TH_2, see Figure 6 of {{RFC9528}}.
+- SALT_4e3m is derived from PRK_3e2m and TH_3, see Figure 6 of {{RFC9528}}.
 
 ~~~~~~~~~~~~
 PRK_3e2m    = PRK_2e
@@ -179,7 +187,7 @@ KEYSTREAM_3 = EDHOC_KDF( PRK_3e2m, 11, TH_3, plaintext_length_3 )
 K_3         = EDHOC_KDF( PRK_4e3m, 3, TH_3, key_length )
 IV_3        = EDHOC_KDF( PRK_4e3m, 4, TH_3, iv_length )
 ~~~~~~~~~~~~
-{: #fig-variant2key title="Key Derivation of EDHOC PSK Authentication Method." artwork-align="center"}
+{: #fig-variant2key title="Key Derivation of EDHOC-PSK." artwork-align="center"}
 
 where:
 
@@ -256,48 +264,7 @@ Compared to {{RFC9528}}, a fourth message does not only provide key confirmation
 
 After verifying message_4, the Initiator is assured that the Responder has calculated the key PRK_out (key confirmation) and that no other party can derive the key. The Initiator MUST NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message, from the Responder and the application has authenticated the Responder.
 
-# Security Considerations
-
-PSK authentication method introduces changes with respect to the current specification of EDHOC {{RFC9528}}. This section analyzes the security implications of these changes.
-
-## Identity protection
-
-EDHOC-PSK encrypts ID_CRED_PSK in message 3, XOR encrypted with a keystream derived from the ephemeral shared secret G_XY. As a consequence, contrary to the current EDHOC methods that protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See {{Section 9.1 of RFC9528}}), EDHOC-PSK provides identity protection for both the Initator and the Responder against passive attackers.
-
-## Mutual Authentication
-
-Authentication in EDHOC-PSK depends on the security of the session key and the protocol's confidentiality. Both security properties hold as long as the PSK remains secret. Even though the fourth message (message_4) remains optional, mutual authentication is not guaranteed without it, or without an OSCORE message or any application data that confirms that the Responder owns the PSK. When message_4 is included, the protocol achieves explicit key confirmation in addition to mutual authentication.
-
-## External Authorization Data Protection
-
-Similarly to {{RFC9528}}, EDHOC-PSK provides external authorization data protection. The integrity and confidentiality of EAD fields follow the same security guarantees as in the original EDHOC specification.
-
-## Post Quantum Considerations
-
-Recent achievements in developing quantum computers demonstrate that it is probably feasible to build one that is cryptographically significant. If such a computer is implemented, many of the cryptographic algorithms and protocols currently in use would be insecure. A quantum computer would be able to solve Diffie-Hellman (DH) and Elliptic Curve Diffie-Hellman (ECDH) problems in polynomial time.
-
-EDCHOC with pre-shared keys would not be vulnerable to quantum attacks because those keys are used as inputs to the key derivation function. The use of intermediate keys derived through key derivation functions ensure that the message is not immediately compromised if the symmetrically distributed key (PSK) is compromised, or if the algorithm used to distribute keys asymmetrically (DH) is broken. If the pre-shared key has sufficient entropy and the Key Derivation Function (KDF), encryption, and authentication transforms are quantum secure, then the resulting system is believed to be quantum secure.
-Therefore, provided that the PSK remains secret, EDHOC-PSK provides confidentiality, mutual authentication and Perfect Forward Secrecy (PFS) even in the presence of quantum attacks. What is more, the key exchange is still a key agreement where both parties contribute with randomness.
-
-## Independence of Session Keys
-
-NIST mandates that an ephemeral private key shall be used in exactly one key-establishment transaction (see Section 5.6.3.3 of {{SP-800-56A}}). This requirement is essential for preserving session key independence and ensuring forward secrecy. The EDHOC-PSK protocol complies with this NIST requirement.
-
-In other protocols, the reuse of ephemeral keys, particularly when combined with implementation flaws such as the absence of public key validation, has resulted in critical security vulnerabilities. Such weaknesses have allowed attackers to recover the so called “ephemeral” private key from a compromised session, thereby enabling them to compromise the security of both past and future sessions between legitimate parties. Assuming breach and minimizing the impact of compromise are fundamental zero-trust principles.
-
-## Unified Approach and Recommendations
-
-For use cases involving the transmission of application data, application data can be sent concurrently with message_3, maintaining the protocol's efficiency.
-In applications such as EAP-EDHOC, where application data is not sent, message_4 is mandatory. Thus, EDHOC-PSK authentication method does not include any extra messages.
-Other implementations may continue using OSCORE in place of EDHOC message_4, with a required change in the protocol's language to:
-      The Initiator SHALL NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message.
-
-This change ensures that key materials are only stored once their integrity and authenticity are confirmed, thereby enhancing privacy by preventing early storage of potentially compromised keys.
-
-Lastly, whether the Initiator or Responder authenticates first is not relevant when using symmetric keys.
-This consideration was important for the privacy properties when using asymmetric authentication but is not significant in the context of symmetric key usage.
-
-# PSK usage for Session Resumtpion {#psk-resumption}
+# PSK usage for Session Resumption {#psk-resumption}
 
 This section defines how PSKs are used for session resumption in EDHOC.
 Following {{Section 4.2 of RFC9528}}, EDHOC_Exporter can be used to derive both CRED_PSK and ID_CRED_PSK:
@@ -309,7 +276,7 @@ ID_CRED_PSK = EDHOC_Exporter( 3, h'', id_cred_psk_length )
 
 where:
 
-  - resumption_pks_length is by default, at least, the key_length (length of the encryption key of the EDHOC AEAD algorithm of the selected cipher suite) of the session in which the EDHOC_Exporter is called.
+  - resumption_psk_length is by default the key_length (length of the encryption key of the EDHOC AEAD algorithm of the selected cipher suite) of the session in which the EDHOC_Exporter is called.
   - id_cred_psk_length is by default 2.
 
 A peer that has successfully completed an EDHOC session, regardless of the used authentication method, MUST generate a resumption key to use for the next resumption in the present "session series", as long as it supports PSK resumption.
@@ -320,13 +287,13 @@ To guarantee that both peers share the same resumption key, when a session is ru
     That is, upon receiving EDHOC message_3, the Responder knows for sure that the other peer did derive rPSK_i at the end of the previous session in the "session series", thus making it safe to delete the previous resumption key rPSK_(i-1).
 
 
-## Ciphersuite Requirements for Resumption
+## Cipher Suite Requirements for Resumption
 
 When using a resumption PSK derived from a previous EDHOC exchange:
 
-  1. The resumption PSK MUST only be used with the same ciphersuite that was used in the original EDHOC exchange, or with a ciphersuite that provides equal or higher security guarantees.
-  2. Implementations SHOULD manitain a mapping between the resumption PSK and its originating ciphersuite to enforce this requirement.
-  3. If a resumption PSK is offered with a ciphersuite different from the one used in the original EDHOC session, the recipient can fail the present EDHOC session according to application-specific policies.
+  1. The resumption PSK MUST only be used with the same cipher suite that was used in the original EDHOC exchange, or with a cipher suite that provides equal or higher security guarantees.
+  2. Implementations SHOULD maintain a mapping between the resumption PSK and its originating cipher suite to enforce this requirement.
+  3. If a resumption PSK is offered with a cipher suite different from the one used in the original EDHOC session, the recipient can fail the present EDHOC session according to application-specific policies.
 
 ## Privacy Considerations for Resumption
 
@@ -342,6 +309,46 @@ When using resumption PSKs:
 - Resumption PSKs MUST be securely stored with the same level of protection as the original session keys.
 - Parties SHOULD implement mechanisms to detect and prevent excessive reuse of the same resumption PSK.
 
+# Security Considerations
+
+The EDHOC-PSK authentication method introduces changes with respect to the current specification of EDHOC {{RFC9528}}. This section analyzes the security implications of these changes.
+
+## Identity protection
+
+EDHOC-PSK encrypts ID_CRED_PSK in message 3 with a keystream derived from the ephemeral shared secret G_XY. As a consequence, contrary to the current EDHOC methods that protect the Initiator’s identity against active attackers and the Responder’s identity against passive attackers (See {{Section 9.1 of RFC9528}}), EDHOC-PSK provides identity protection for both the Initiator and the Responder against passive attackers.
+
+## Mutual Authentication
+
+EDHOC-PSK provides mutual authentication, assuming the PSK remains secret. However, if the optional fourth message (message_4) is omitted, mutual authentication is not guaranteed—unless the Responder is later authenticated through an OSCORE message or other application data demonstrating possession of the PSK. When message_4 is included, the protocol ensures both mutual authentication and explicit key confirmation.
+
+## External Authorization Data Protection
+
+Similarly to {{RFC9528}}, EDHOC-PSK provides external authorization data protection. The integrity and confidentiality of EAD fields follow the same security guarantees as in the original EDHOC specification.
+
+## Post Quantum Considerations
+
+Recent advancements in quantum computing suggest that the development of a Cryptographically Relevant Quantum Computer (CRQC) is likely feasible long-term. If realized, such a machine would render many currently deployed asymmetric cryptographic algorithms—such as Elliptic Curve Diffie-Hellman (ECDH)—insecure.
+
+By leveraging a symmetric PSK for both authentication and key derivation, EDHOC-PSK provides quantum-resistant key exchange and authentication, even when used with ECDHE. However, if a cryptographically relevant quantum computer (CRQC) is realized, the ECDHE component would be broken and contribute only randomness. Consequently, EDHOC-PSK with ECDHE does not offer identity protection or Perfect Forward Secrecy (PFS) against quantum-capable adversaries. If the PSK is compromised, a passive quantum attacker could decrypt both past and future sessions. In contrast, EDHOC-PSK combined with a quantum-resistant Key Encapsulation Mechanism (KEM), such as ML-KEM, provides identity protection and PFS even in the presence of a quantum attacker.
+
+## Independence of Session Keys
+
+NIST mandates that an ephemeral private key shall be used in exactly one key-establishment transaction (see Section 5.6.3.3 of {{SP-800-56A}}). This requirement is essential for preserving session key independence and ensuring forward secrecy. The EDHOC-PSK protocol complies with this NIST requirement.
+
+In other protocols, the reuse of ephemeral keys, particularly when combined with implementation flaws such as the absence of public key validation, has resulted in critical security vulnerabilities. Such weaknesses have allowed attackers to recover the so called “ephemeral” private key from a compromised session, thereby enabling them to compromise the security of both past and future sessions between legitimate parties. Assuming breach and minimizing the impact of compromise are fundamental zero-trust principles.
+
+## Unified Approach and Recommendations
+
+For use cases involving the transmission of application data, application data can be sent concurrently with message_3, maintaining the protocol's efficiency.
+In applications such as EAP-EDHOC, where application data is not sent, message_4 is mandatory. Thus, the EDHOC-PSK authentication method does not include any extra messages.
+Other implementations may continue using OSCORE in place of EDHOC message_4, with a required change in the protocol's language to:
+      The Initiator SHALL NOT persistently store PRK_out or application keys until the Initiator has verified message_4 or a message protected with a derived application key, such as an OSCORE message.
+
+This change ensures that key materials are only stored once their integrity and authenticity are confirmed, thereby enhancing privacy by preventing early storage of potentially compromised keys.
+
+Lastly, whether the Initiator or Responder authenticates first is not relevant when using symmetric keys.
+This consideration was important for the privacy properties when using asymmetric authentication but is not significant in the context of symmetric key usage.
+
 # IANA Considerations
 
 This document has IANA actions.
@@ -350,45 +357,18 @@ This document has IANA actions.
 
 IANA is requested to register the following entry in the "EDHOC Method Type" registry under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
 
-~~~~~~~~~~~ aasvg
-+------------+------------------------------+---------------------------------+-------------------+
-| Value      | Initiator Authentication Key | Responder Authentication Key    | Reference         |
-+============+==============================+=================================+===================+
-|  4         |                 PSK          |                 PSK             |                   |
-+------------+------------------------------+---------------------------------+-------------------+
-
-~~~~~~~~~~~
-{: #fig-method-psk title="Addition to the EDHOC Method Type Registry."}
+| Value | Initiator Authentication Key | Responder Authentication Key |
+| 4     | PSK                          | PSK                          |
+{: #tab-method-psk title="Addition to the EDHOC Method Type Registry."}
 
 ## EDHOC Exporter Label Registry
 
 IANA is requested to register the following entry in the "EDHOC Exporter Label" registry under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
 
-~~~~~~~~~~~ aasvg
-+------------+------------------------------+-------------------+-------------------+
-| Label      | Descritpion                  | Change Controller | Reference         |
-+============+==============================+===================+===================+
-|  2         | Resumption CRED_PSK          |       IETF        | Section 7         |
-+------------+------------------------------+-------------------+-------------------+
-|  3         | Resumption ID_CRED_PSK       |       IETF        | Section 7         |
-+------------+------------------------------+-------------------+-------------------+
-
-~~~~~~~~~~~
-{: #fig-exporter-psk title="Addition to the EDHOC Exporter Label Registry."}
-
-## EDHOC Info Label Registry
-
-IANA is requested to register the following registry "EDHOC Info Label" under the group name "Ephemeral Diffie-Hellman Over OCSE (EDHOC)".
-
-~~~~~~~~~~~ aasvg
-+------------+-----------------------+-------------------+
-| Label      |          Key          |  Reference        |
-+============+=======================+===================+
-|  11        |       KEYSTREAM_3     |   Section 4       |
-+------------+-----------------------+-------------------+
-
-~~~~~~~~~~~
-{: #fig-info-label-psk title="EDHOC Info Label Registry."}
+| Label | Description            | Change Controller | Reference |
+| 2     | Resumption CRED_PSK    | IETF              | Section 7 |
+| 3     | Resumption ID_CRED_PSK | IETF              | Section 7 |
+{: #tab-exporter-psk title="Additions to the EDHOC Exporter Label Registry."}
 
 --- back
 
@@ -463,7 +443,7 @@ info = (
 
 ## message_1
 
-Both endpoints are authenticated with Pre-Shred Keys (METHOD = 4)
+Both endpoints are authenticated with Pre-Shared Keys (METHOD = 4)
 
 ~~~~~~~~~~~~
 METHOD (CBOR Data Item) (1 byte)
@@ -701,10 +681,10 @@ CIPHERTEXT_3B (CBOR Sequence) (9 bytes)
 48 D0 A4 37 3C 49 C1 76 9B
 ~~~~~~~~~~~~
 
-The Initiator computes KESYTREAM_3 as defined in Section 4:
+The Initiator computes KEYSTREAM_3 as defined in Section 4:
 
 ~~~~~~~~~~~~
-KESYTREAM_3 (CBOR Sequence) ()
+KEYSTREAM_3 (CBOR Sequence) ()
 D0 1B 7A AD 4C AB BD 14 89 50
 ~~~~~~~~~~~~
 
@@ -715,7 +695,7 @@ PLAINTEXT_3A (CBOR Sequence) (10 bytes)
 10 48 D0 A4 37 3C 49 C1 76 9B
 ~~~~~~~~~~~~
 
-It then uses KESYTREAM_3 to derive CIPHERTEXT_3A:
+It then uses KEYSTREAM_3 to derive CIPHERTEXT_3A:
 
 ~~~~~~~~~~~~
 CIPHERTEXT_3A (CBOR Sequence) (10 bytes)
@@ -738,7 +718,7 @@ E5 67 45 39 75 66 CF F9 A6 93 DF 29 8D A4 F9 9E 1F 92 57 54
 44 6B 5B 11 09 61 59 E5 C4 FC 0B FD
 ~~~~~~~~~~~~
 
-## message_ 4
+## message_4
 
 No external authorization data:
 
@@ -775,10 +755,15 @@ message_4 (CBOR Sequence) (9 bytes)
 
 RFC Editor: Please remove this appendix.
 
+* From -03 to -04
+
+  * Test Vectors
+  * Editorial changes
+
 * From -02 to -03
 
   * Updated abstract and Introduction
-  * Changed message_3 to hide the identity lenght from passive attackers
+  * Changed message_3 to hide the identity length from passive attackers
   * CDDL Definitions
   * Security considerations of independence of Session Keys
   * Editorial changes
