@@ -299,10 +299,10 @@ After verifying message_4, the Initiator is assured that the Responder has calcu
 # PSK usage for Session Resumption {#psk-resumption}
 
 This section defines how PSKs are used for session resumption in EDHOC.
-Following {{Section 4.2 of RFC9528}}, EDHOC_Exporter can be used to derive both CRED_PSK and ID_CRED_PSK:
+Following {{Section 4.2 of RFC9528}}, EDHOC_Exporter can be used to derive both PSK and ID_CRED_PSK:
 
 ~~~~~~~~~~~~
-CRED_PSK = EDHOC_Exporter( 2, h'', resumption_psk_length )
+PSK = EDHOC_Exporter( 2, h'', resumption_psk_length )
 ID_CRED_PSK = EDHOC_Exporter( 3, h'', id_cred_psk_length )
 ~~~~~~~~~~~~
 
