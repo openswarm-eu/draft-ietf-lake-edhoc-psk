@@ -253,9 +253,20 @@ CIPHERTEXT_2 is calculated with a binary additive stream cipher, using a keystre
 
 Contrary to {{RFC9528}}, ID_CRED_R, MAC_2, and Signature_or_MAC_2 are not used. C_R, EAD_2, and KEYSTREAM_2 are defined in {{Section 5.3.2 of RFC9528}}.
 
+MAC_2 is unnecessary because confidentiality and implicit authentication are provided via the PSK-derived keystream encryption. Only a party that possesses the correct PSK can correctly generate the keystream used to encrypt PLAINTEXT_2B and thus decrypt CIPHERTEXT_2. This ensures that the initiator only proceeds if it is confident the responder knows the correct PSK.
+
 ### Initiator Processing of Message 2
 
+Upon receiving message_2, the Initiator processes it as follows:
+
+* It computes KEYSTREAM_2, following {{Section 5.3.2 of RFC9528}}. The length of the keystream matches the expected length of PLAINTEXT_2B.
+* It decrypts CIPHERTEXT_2 using binary XOR, i.e., PLAINTEXT_2B = CIPHERTEXT_2 XOR KEYSTREAM_2
+
+Successful decryption implies the Responder possessed the correct PSK, since only the legitimate responder can generate the correct KEYSTREAM_2.
+
 Compared to {{Section 5.3.3 of RFC9528}}, ID_CRED_R is not made available to the application in step 4, and steps 5 and 6 are skipped
+
+This approach ensures that the initiator only continues the protocol if it successfully decrypts and parses CIPHERTEXT_2, thus providing implicit authentication of the responder based on shared PSK knowledge.
 
 ## Message 3
 
@@ -286,7 +297,34 @@ Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 
 The Initiator computes TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3B, CRED_PSK ), defined in {{key-der}}.
 
+There is no need for MAC_3 or signature, since AEAD's built-in integrity and the use of PSK-based key derivation provides implicit authentication of the Initiator.
+
 ### Responder Processing of Message 3
+
+Upon receiving message_3, the Responder performs the following steps:
+
+* Derive the decryption key K_3 and IV_3 as defined in {{key-der}}.
+
+* Parse the structure of message_3, which consists of a stream-cipher encrypted structure, CIPHERTEXT_3 = PLAINTEXT_3A XOR KEYSTREAM_3, where PLAINTEXT_3A = ( ID_CRED_PSK, CIPHERTEXT_3B ) and CIPHERTEXT_3B is the inner AEAD-encrypted object.
+
+* Generate KEYSTREAM_3 with the same method the initiator used.
+
+* Decrypt CIPHERTEXT_3 using binary XOR with KEYSTREAM_3, resulting in PLAINTEXT_3A = ( ID_CRED_PSK, CIPHERTEXT_3B ).
+
+* Validate or match ID_CRED_PSK to identify which PSK to use. If the ID is unrecognized, the Responder aborts.
+
+* AEAD-decrypt CIPHERTEXT_3B using:
+
+  - K_3, IV_3
+  - external_aad = << ID_CRED_PSK, TH_3, CRED_PSK >>
+  - protected = h''
+  - AEAD algorithm from cipher suite
+
+If verification fails, this indicates either the Initiator does not know the correct PSK, or the message was tampered with. Contrary, if verification succeeds, the Responder conlcudes that the Initiator knows the correct PSK, has correctly derived the transcript hash TH_3 and is actively participating in the protocol.
+
+Lastly, the Responder computes TH_4 as defined in {{key-der}}
+
+No MAC_3 or signature is needed, as the AEAD tag guarantees both integrity and authenticity in this symmetric setting.
 
 ## Message 4
 
