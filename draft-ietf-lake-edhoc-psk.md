@@ -346,14 +346,17 @@ ID_CRED_PSK = EDHOC_Exporter( 3, h'', id_cred_psk_length )
 
 where:
 
-  - resumption_psk_length is by default the key_length (length of the encryption key of the EDHOC AEAD algorithm of the selected cipher suite) of the session in which the EDHOC_Exporter is called.
-  - id_cred_psk_length is by default 2.
+  * resumption_psk_length is by default the key_length (length of the encryption key of the EDHOC AEAD algorithm of the selected cipher suite) of the session in which the EDHOC_Exporter is called.
+
+  * id_cred_psk_length is by default 2.
 
 A peer that has successfully completed an EDHOC session, regardless of the used authentication method, MUST generate a resumption key to use for the next resumption in the present "session series", as long as it supports PSK resumption.
-To guarantee that both peers share the same resumption key, when a session is run using rPSK_i as a resumption key
-  - The Initiator can delete rPSK_i after having successfully verified EDHOC message_4.
+To guarantee that both peers share the same resumption key, when a session is run using rPSK_i as a resumption key:
+
+  * The Initiator can delete rPSK_i after having successfully verified EDHOC message_4.
     In this case, the Responder will have derived the next rPSK_(i+1), which the Initiator can know for sure, upon receiving EDHOC message_4.
-  - The Responder can delete rPSK_(i-1), if any, after having successfully sent EDHOC message_4.
+
+  * The Responder can delete rPSK_(i-1), if any, after having successfully sent EDHOC message_4.
     That is, upon receiving EDHOC message_3, the Responder knows for sure that the other peer did derive rPSK_i at the end of the previous session in the "session series", thus making it safe to delete the previous resumption key rPSK_(i-1).
 
 
@@ -369,15 +372,15 @@ When using a resumption PSK derived from a previous EDHOC exchange:
 
 When using resumption PSKs:
 
-  - The same ID_CRED_PSK is reused each time EDHOC is executed with a specific resumption PSK.
-  - To prevent long-term tracking, implementations SHOULD periodically initiate a full EDHOC exchange to generate a new resumption PSK and corresponding ID_CRED_PSK. Alternatively, as stated in {{Appendix H of RFC9528}}, EDHOC_KeyUpdate can be used to derive a new PRK_out, and consequently a new CRED_PSK and ID_CRED_PSK for session resumption.
+  * The same ID_CRED_PSK is reused each time EDHOC is executed with a specific resumption PSK.
+  * To prevent long-term tracking, implementations SHOULD periodically initiate a full EDHOC exchange to generate a new resumption PSK and corresponding ID_CRED_PSK. Alternatively, as stated in {{Appendix H of RFC9528}}, EDHOC_KeyUpdate can be used to derive a new PRK_out, and consequently a new CRED_PSK and ID_CRED_PSK for session resumption.
 
 
 ## Security Considerations for Resumption
 
-- Resumption PSKs MUST NOT be used for purposes other than EDHOC session resumption.
-- Resumption PSKs MUST be securely stored with the same level of protection as the original session keys.
-- Parties SHOULD implement mechanisms to detect and prevent excessive reuse of the same resumption PSK.
+* Resumption PSKs MUST NOT be used for purposes other than EDHOC session resumption.
+* Resumption PSKs MUST be securely stored with the same level of protection as the original session keys.
+* Parties SHOULD implement mechanisms to detect and prevent excessive reuse of the same resumption PSK.
 
 # Security Considerations
 
