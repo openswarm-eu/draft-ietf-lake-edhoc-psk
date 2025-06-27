@@ -141,7 +141,11 @@ A common representation of CRED_PSK is a CBOR Web Token (CWT) or CWT Claims Set 
 
 Alternative formats for CRED_PSK MAY be used, as long as they allow the recipient to identify and retrieve the correct PSK. When the authentication credential includes only a COSE_Key (e.g., a raw key reference), it SHOULD be wrapped as a CCS by prefixing it with a 'cnf' claim. In this case, the resulting CRED_PSK contains no identity beyond the key itself.
 
-Implementations SHOULD consider including identity information (e.g., the 'sub' claim) in CRED_PSK to protect against misbinding attacks; see {{Appendix D.2 of RFC9528}}.
+Implementations MUST ensure that CRED_PSK values used by the Initiator and the Responder carry distinct identities in their sub claims (e.g., "42-50-31-FF-EF-37-32-39" and "23-11-58-AA-B3-7F-10"). This enables corrcte identification of parties and prevents misbinding attacks, as per {{Appendix D.2 of RFC9528}}. These identities are not transmitted on the wire, but they MUST be included in the computation of transcript hashe:
+
+* TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3B, CRED_PSK )
+
+This prevents reflection attacks and enforces correct binding of credentials to roles. Note that sub is used solely for identity binding and MUST NOT be included in the key derivation function, such as EDHOC_Extract(), where only the cryptographic key material (e.g., cnf) is used.
 
 ### Encoding and processing guidelines
 
