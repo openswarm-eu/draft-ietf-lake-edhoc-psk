@@ -48,6 +48,7 @@ normative:
   RFC8742:
   RFC8949:
   RFC8610:
+  RFC9668:
   RFC8392:
   SP-800-56A:
     target: https://doi.org/10.6028/NIST.SP.800-56Ar3
@@ -385,6 +386,11 @@ When using resumption PSKs:
 * Resumption PSKs MUST NOT be used for purposes other than EDHOC session resumption.
 * Resumption PSKs MUST be securely stored with the same level of protection as the original session keys.
 * Parties SHOULD implement mechanisms to detect and prevent excessive reuse of the same resumption PSK.
+
+# EDHOC PSK and OSCORE
+
+When PSK authenitcation is used and the Initiator is able to derive PRK_out before sending message_3, then the optimization described in {{Section 3 of RFC9668}} applies. In this scenario, the Initiator MAY concatenate EDHOC message_3 and the first OSCORE request in a single CoAP message.
+
 
 # Security Considerations
 
