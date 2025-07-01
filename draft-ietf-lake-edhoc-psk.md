@@ -160,7 +160,7 @@ The following guidelines apply to the encoding and handling of CRED_PSK and ID_C
 
 These optimizations MUST NOT be applied in COSE header parameters or other contexts where full map structure is required.
 
-- When necessary for authentication context (e.g., to mitigate misbinding attacks), identity information such as a 'sub' (subject) claim MUST be included in CRED_PSK. If no such identity is present, the authentication credential binds only to the key.
+- To mitigate misbinding attacks, identity information such as a 'sub' (subject) claim MUST be included in CRED_PSK. If no such identity is present, the authentication credential binds only to the key.
 
 - Guidelines in {{RFC9528}} related to certificate chains, X.509 DER encoding, or public key validation do not apply to CRED_PSK, since it encapsulates a symmetric key and is not used for explicit signature or certificate validation.
 
