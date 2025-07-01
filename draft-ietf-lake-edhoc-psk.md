@@ -123,7 +123,7 @@ While CRED_PSK may adopt encoding and representation patterns from {{Section 3.5
 
 - CRED_PSK contains or identifies a symmetric key, not a public authentication key.
 
-- Authentication is achieved implicitly via the successful use of the PSK to derive keying material and decrypt protected messages.
+- Authentication is achieved implicitly via the successful use of the PSK to derive keying material and encrypt and posteriorly decrypt protected messages.
 
 A common representation of CRED_PSK is a CBOR Web Token (CWT) or CWT Claims Set (CCS) {{RFC8392}} whose 'cnf' claim uses the confirmation method 'COSE_Key' to carry the PSK. An example of CRED_PSK would be:
 
@@ -158,13 +158,13 @@ The following guidelines apply to the encoding and handling of CRED_PSK and ID_C
 
 - ID_CRED_PSK SHOULD uniquely identify the correspoding CRED_PSK to avoid ambiguity. In cases where ID_CRED_PSK is a reference to a key identifier, care must be taken to ensure that 'kid' is globally unique for the PSK.
 
-- When ID_CRED_PSK consists solely of a 'kid' parameter (i.e., { 4 : kid }), the compact encoding optimization defined in {{Section 3.5.3.2 of RFC9528}} MUST be applied in plaintext fields (such as PLAINTEXT_3). For example:
+- When ID_CRED_PSK consists solely of a 'kid' parameter (i.e., { 4 : kid }), the compact encoding optimization defined in {{Section 3.5.3.2 of RFC9528}} MUST be applied in plaintext fields (such as PLAINTEXT_3A). For example:
   - { 4 : h'0f' } encoded as h'0f' (CBOR byte string)
   - { 4 : 21 } encoded as 0x15 (CBOR integer)
 
 These optimizations MUST NOT be applied in COSE header parameters or other contexts where full map structure is required.
 
-- When necessary for authentication context (e.g., to mitigate misbinding attacks), identity information such as a 'sub' (subject) claim SHOULD be included in CRED_PSK. If no such identity is present, the authentication credential binds only to the key.
+- When necessary for authentication context (e.g., to mitigate misbinding attacks), identity information such as a 'sub' (subject) claim MUST be included in CRED_PSK. If no such identity is present, the authentication credential binds only to the key.
 
 - Guidelines in {{RFC9528}} related to certificate chains, X.509 DER encoding, or public key validation do not apply to CRED_PSK, since it encapsulates a symmetric key and is not used for explicit signature or certificate validation.
 
@@ -258,8 +258,6 @@ CIPHERTEXT_2 is calculated with a binary additive stream cipher, using a keystre
 
 Contrary to {{RFC9528}}, ID_CRED_R, MAC_2, and Signature_or_MAC_2 are not used. C_R, EAD_2, and KEYSTREAM_2 are defined in {{Section 5.3.2 of RFC9528}}.
 
-MAC_2 is unnecessary because confidentiality and implicit authentication are provided via the PSK-derived keystream encryption. Only a party that possesses the correct PSK can correctly generate the keystream used to encrypt PLAINTEXT_2B and thus decrypt CIPHERTEXT_2. This ensures that the initiator only proceeds if it is confident the responder knows the correct PSK.
-
 ### Initiator Processing of Message 2
 
 Upon receiving message_2, the Initiator processes it as follows:
@@ -267,11 +265,7 @@ Upon receiving message_2, the Initiator processes it as follows:
 * It computes KEYSTREAM_2, following {{Section 5.3.2 of RFC9528}}. The length of the keystream matches the expected length of PLAINTEXT_2B.
 * It decrypts CIPHERTEXT_2 using binary XOR, i.e., PLAINTEXT_2B = CIPHERTEXT_2 XOR KEYSTREAM_2
 
-Successful decryption implies the Responder possessed the correct PSK, since only the legitimate responder can generate the correct KEYSTREAM_2.
-
 Compared to {{Section 5.3.3 of RFC9528}}, ID_CRED_R is not made available to the application in step 4, and steps 5 and 6 are skipped
-
-This approach ensures that the initiator only continues the protocol if it successfully decrypts and parses CIPHERTEXT_2, thus providing implicit authentication of the responder based on shared PSK knowledge.
 
 ## Message 3
 
