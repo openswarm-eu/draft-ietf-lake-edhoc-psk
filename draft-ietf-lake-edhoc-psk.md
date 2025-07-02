@@ -210,23 +210,26 @@ The transcript hash TH_2 = H( G_Y, H(message_1) ) is defined as in {{Section 5.3
 - PRK_2e is extracted with
    - `salt` = TH_2, and
    - `IKM` = G_XY.
-- KEYSTREAM_2 is derived from PRK_2e and TH_2, see Figure 6 of {{RFC9528}}.
 - SALT_4e3m is derived from PRK_3e2m and TH_3, see Figure 6 of {{RFC9528}}.
 
 ~~~~~~~~~~~~
-PRK_3e2m    = PRK_2e
-PRK_4e3m    = EDHOC_Extract( SALT_4e3m, CRED_PSK )
-KEYSTREAM_3 = EDHOC_KDF( PRK_3e2m, 11, TH_3, plaintext_length_3 )
-K_3         = EDHOC_KDF( PRK_4e3m, 3, TH_3, key_length )
-IV_3        = EDHOC_KDF( PRK_4e3m, 4, TH_3, iv_length )
+PRK_3e2m     = PRK_2e
+PRK_4e3m     = EDHOC_Extract( SALT_4e3m, CRED_PSK )
+KEYSTREAM_3A = EDHOC_KDF( PRK_3e2m, 11, TH_3, plaintext_length_3a )
+KEYSTREAM_2A = EDHOC_KDF( PRK_2e,   0, TH_2,  plaintext_length_2a )
+K_3          = EDHOC_KDF( PRK_4e3m, 3, TH_3, key_length )
+IV_3         = EDHOC_KDF( PRK_4e3m, 4, TH_3, iv_length )
 ~~~~~~~~~~~~
 {: #fig-variant2key title="Key Derivation of EDHOC-PSK." artwork-align="center"}
 
 where:
 
-- KEYSTREAM_3 is used to encrypt the PLAINTEXT_3A, a concatenation of ID_CRED_PSK and CIPHERTEXT_3B, in message_3.
-- TH_3 = H( TH_2, PLAINTEXT_2B )
-- plaintext_length_3 is the length of PLAINTEXT_3A in message_3
+- KEYSTREAM_3A is used to encrypt the PLAINTEXT_3A, a concatenation of ID_CRED_PSK and CIPHERTEXT_3B, in message_3.
+- KEYSTREAM_2A is used to encrypt PLAINTEXT_2A in message_2.
+- TH_3 = H( TH_2, PLAINTEXT_2B ).
+- plaintext_length_2a is the length of PLAINTEXT_2A in message_2.
+- plaintext_length_3a is the length of PLAINTEXT_3A in message_3.
+
 
 Additionally, the definition of the transcript hash TH_4 is modified as:
 
@@ -248,19 +251,19 @@ Message 2 is formatted as specified in {{Section 5.3.1 of RFC9528}}.
 
 ### Responder Composition of Message 2
 
-CIPHERTEXT_2B is calculated with a binary additive stream cipher, using a keystream generated with EDHOC_Expand, and the following plaintext:
+CIPHERTEXT_2A is calculated with a binary additive stream cipher, using a keystream generated with EDHOC_Expand, and the following plaintext:
 
-* PLAINTEXT_2B = ( C_R, ? EAD_2 )
-* CIPHERTEXT_2B = PLAINTEXT_2B XOR KEYSTREAM_2
+* PLAINTEXT_2A = ( C_R, ? EAD_2 )
+* CIPHERTEXT_2A = PLAINTEXT_2A XOR KEYSTREAM_2A
 
-Contrary to {{RFC9528}}, ID_CRED_R, MAC_2, and Signature_or_MAC_2 are not used. C_R, EAD_2, and KEYSTREAM_2 are defined in {{Section 5.3.2 of RFC9528}}.
+Contrary to {{RFC9528}}, ID_CRED_R, MAC_2, and Signature_or_MAC_2 are not used. C_R, EAD_2 are defined in {{Section 5.3.2 of RFC9528}}. KESYTREAM_2A is defined in {{key-der}}.
 
 ### Initiator Processing of Message 2
 
 Upon receiving message_2, the Initiator processes it as follows:
 
-* It computes KEYSTREAM_2, following {{Section 5.3.2 of RFC9528}}, where plaintext_length is the length of PLAINTEXT_2B.
-* It decrypts CIPHERTEXT_2B using binary XOR, i.e., PLAINTEXT_2B = CIPHERTEXT_2B XOR KEYSTREAM_2
+* It computes KEYSTREAM_2A, following {{key-der}}, where plaintext_length_2a is the length of PLAINTEXT_2A.
+* It decrypts CIPHERTEXT_2A using binary XOR, i.e., PLAINTEXT_2A = CIPHERTEXT_2A XOR KEYSTREAM_2A
 
 Compared to {{Section 5.3.3 of RFC9528}}, ID_CRED_R is not made available to the application in step 4, and steps 5 and 6 are skipped
 
@@ -280,9 +283,9 @@ Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 
       * If the length of PLAINTEXT_3A exceeds the output of EDHOC_KDF, then {{Appendix G of RFC9528}} applies.
 
-   * Compute KEYSTREAM_3 as in {{key-der}}, where plaintext_length is the length of PLAINTEXT_3A.
+   * Compute KEYSTREAM_3 as in {{key-der}}, where plaintext_length_3a is the length of PLAINTEXT_3A.
 
-   * CIPHERTEXT_3A = PLAINTEXT_3A XOR KEYSTREAM_3
+   * CIPHERTEXT_3A = PLAINTEXT_3A XOR KEYSTREAM_3A
 
 * CIPHERTEXT_3B is the 'ciphertext' of COSE_Encrypt0 object as defined in {{Section 5.2 and Section 5.3 of RFC9528}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in {{Section 5.2 of RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
@@ -301,11 +304,11 @@ Upon receiving message_3, the Responder performs the following steps:
 
 * Derive the decryption key K_3 and IV_3 as defined in {{key-der}}.
 
-* Parse the structure of message_3, which consists of a stream-cipher encrypted structure, CIPHERTEXT_3 = PLAINTEXT_3A XOR KEYSTREAM_3, where PLAINTEXT_3A = ( ID_CRED_PSK, CIPHERTEXT_3B ) and CIPHERTEXT_3B is the inner AEAD-encrypted object.
+* Parse the structure of message_3, which consists of a stream-cipher encrypted structure, CIPHERTEXT_3A = PLAINTEXT_3A XOR KEYSTREAM_3A, where PLAINTEXT_3A = ( ID_CRED_PSK, CIPHERTEXT_3B ) and CIPHERTEXT_3B is the inner AEAD-encrypted object.
 
-* Generate KEYSTREAM_3 with the same method the initiator used.
+* Generate KEYSTREAM_3A with the same method the initiator used.
 
-* Decrypt CIPHERTEXT_3A using binary XOR with KEYSTREAM_3, resulting in PLAINTEXT_3A = ( ID_CRED_PSK, CIPHERTEXT_3B ).
+* Decrypt CIPHERTEXT_3A using binary XOR with KEYSTREAM_3A, resulting in PLAINTEXT_3A = ( ID_CRED_PSK, CIPHERTEXT_3B ).
 
 * Validate or match ID_CRED_PSK to identify which PSK to use. If the ID is unrecognized, the Responder aborts.
 
