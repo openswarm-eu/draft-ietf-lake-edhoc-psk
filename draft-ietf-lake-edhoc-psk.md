@@ -224,8 +224,9 @@ IV_3        = EDHOC_KDF( PRK_4e3m, 4, TH_3, iv_length )
 
 where:
 
-- KEYSTREAM_3 is used to encrypt the ID_CRED_PSK in message_3.
-- TH_3 = H( TH_2, PLAINTEXT_2 )
+- KEYSTREAM_3 is used to encrypt the PLAINTEXT_3A, a concatenation of ID_CRED_PSK and CIPHERTEXT_3B, in message_3.
+- TH_3 = H( TH_2, PLAINTEXT_2B )
+- plaintext_length_3 is the length of PLAINTEXT_3A in message_3
 
 Additionally, the definition of the transcript hash TH_4 is modified as:
 
@@ -247,10 +248,10 @@ Message 2 is formatted as specified in {{Section 5.3.1 of RFC9528}}.
 
 ### Responder Composition of Message 2
 
-CIPHERTEXT_2 is calculated with a binary additive stream cipher, using a keystream generated with EDHOC_Expand, and the following plaintext:
+CIPHERTEXT_2B is calculated with a binary additive stream cipher, using a keystream generated with EDHOC_Expand, and the following plaintext:
 
 * PLAINTEXT_2B = ( C_R, ? EAD_2 )
-* CIPHERTEXT_2 = PLAINTEXT_2B XOR KEYSTREAM_2
+* CIPHERTEXT_2B = PLAINTEXT_2B XOR KEYSTREAM_2
 
 Contrary to {{RFC9528}}, ID_CRED_R, MAC_2, and Signature_or_MAC_2 are not used. C_R, EAD_2, and KEYSTREAM_2 are defined in {{Section 5.3.2 of RFC9528}}.
 
@@ -258,8 +259,8 @@ Contrary to {{RFC9528}}, ID_CRED_R, MAC_2, and Signature_or_MAC_2 are not used. 
 
 Upon receiving message_2, the Initiator processes it as follows:
 
-* It computes KEYSTREAM_2, following {{Section 5.3.2 of RFC9528}}. The length of the keystream matches the expected length of PLAINTEXT_2B.
-* It decrypts CIPHERTEXT_2 using binary XOR, i.e., PLAINTEXT_2B = CIPHERTEXT_2 XOR KEYSTREAM_2
+* It computes KEYSTREAM_2, following {{Section 5.3.2 of RFC9528}}, where plaintext_length is the length of PLAINTEXT_2B.
+* It decrypts CIPHERTEXT_2B using binary XOR, i.e., PLAINTEXT_2B = CIPHERTEXT_2B XOR KEYSTREAM_2
 
 Compared to {{Section 5.3.3 of RFC9528}}, ID_CRED_R is not made available to the application in step 4, and steps 5 and 6 are skipped
 
@@ -271,7 +272,7 @@ Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 
 ### Initiator Composition of Message 3
 
-* CIPHERTEXT_3 is calculated with a binary additive stream cipher, using a keystream generated with EDHOC_Expand, and the following plaintext:
+* CIPHERTEXT_3A is calculated with a binary additive stream cipher, using a keystream generated with EDHOC_Expand, and the following plaintext:
 
    * PLAINTEXT_3A = ( ID_CRED_PSK / bstr / -24..23, CIPHERTEXT_3B )
 
@@ -281,7 +282,7 @@ Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 
    * Compute KEYSTREAM_3 as in {{key-der}}, where plaintext_length is the length of PLAINTEXT_3A.
 
-   * CIPHERTEXT_3 = PLAINTEXT_3A XOR KEYSTREAM_3
+   * CIPHERTEXT_3A = PLAINTEXT_3A XOR KEYSTREAM_3
 
 * CIPHERTEXT_3B is the 'ciphertext' of COSE_Encrypt0 object as defined in {{Section 5.2 and Section 5.3 of RFC9528}}, with the EDHOC AEAD algorithm of the selected cipher suite, using the encryption key K_3, the initialization vector IV_3 (if used by the AEAD algorithm), the parameters described in {{Section 5.2 of RFC9528}}, plaintext PLAINTEXT_3B and the following parameters as input:
 
@@ -304,7 +305,7 @@ Upon receiving message_3, the Responder performs the following steps:
 
 * Generate KEYSTREAM_3 with the same method the initiator used.
 
-* Decrypt CIPHERTEXT_3 using binary XOR with KEYSTREAM_3, resulting in PLAINTEXT_3A = ( ID_CRED_PSK, CIPHERTEXT_3B ).
+* Decrypt CIPHERTEXT_3A using binary XOR with KEYSTREAM_3, resulting in PLAINTEXT_3A = ( ID_CRED_PSK, CIPHERTEXT_3B ).
 
 * Validate or match ID_CRED_PSK to identify which PSK to use. If the ID is unrecognized, the Responder aborts.
 
