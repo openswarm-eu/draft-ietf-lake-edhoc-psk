@@ -194,7 +194,7 @@ message_4 remains optional, but is needed to authenticate the Responder and achi
 
 # Key Derivation {#key-der}
 
-The pseudorandom keys (PRKs) used for the PSK authentication method in EDHOC are derived using EDHOC_Extract, as done in {{RFC9528}}.
+The pseudorandom keys (PRKs) used for the PSK authentication method in EDHOC are derived using EDHOC_Extract, as done in {{RFC9528}}. EDHOC_Extract allows to derive fixed-length uniformly pseudorandom keys (PRKs) from ECDH shared secrets.
 
 ~~~~~~~~~~~~
 PRK  = EDHOC_Extract( salt, IKM )
@@ -202,6 +202,8 @@ PRK  = EDHOC_Extract( salt, IKM )
 
 where `salt` and input keying material (`IKM`) are defined for each key.
 The definition of EDHOC_Extract depends on the EDHOC hash algorithm selected in the cipher suite, see {{Section 4.1.1 of RFC9528}}.
+
+To maintain a uniform key schedule across the different EDHOC authentication methods, the same pseudorandom key notation (PRK_2e, PRK_3e2m, and PRK_4e3m) is retained. In the case of EDHOC with PSK-based authentication, no MACs are used. Consequently, while the naming convention suggests involvement in both encryption and MAC operations, only the parts related to encryption (2e, 3e, and 4e) are relevant. The index notation does not fully reflect the functional role of the keys in this method but is preserved for consistency with other EDHOC authentication variants
 
 The transcript hash TH_2 = H( G_Y, H(message_1) ) is defined as in {{Section 5.3.2 of RFC9528}}, the others are modified as specified below.
 
