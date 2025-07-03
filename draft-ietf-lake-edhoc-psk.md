@@ -228,7 +228,7 @@ where:
 
 - KEYSTREAM_3A is used to encrypt the PLAINTEXT_3A, a concatenation of ID_CRED_PSK and CIPHERTEXT_3B, in message_3.
 - KEYSTREAM_2A is used to encrypt PLAINTEXT_2A in message_2.
-- TH_3 = H( TH_2, PLAINTEXT_2B ).
+- TH_3 = H( TH_2, PLAINTEXT_2A ).
 - plaintext_length_2a is the length of PLAINTEXT_2A in message_2.
 - plaintext_length_3a is the length of PLAINTEXT_3A in message_3.
 
@@ -482,7 +482,7 @@ message_2 = (
   G_Y_CIPHERTEXT_2 : bstr,
 )
 
-PLAINTEXT_2B = (
+PLAINTEXT_2A = (
   C_R : bstr / -24..23,
   ? EAD_2,
 )
@@ -651,10 +651,10 @@ No external authorization data:
 EAD_2 (CBOR Sequence) (0 bytes)
 ~~~~~~~~~~~~
 
-The Responder constructs PLAINTEXT_2B:
+The Responder constructs PLAINTEXT_2A:
 
 ~~~~~~~~~~~~
-PLAINTEXT_2B (CBOR Sequence) (1 byte)
+PLAINTEXT_2A (CBOR Sequence) (1 byte)
 05
 ~~~~~~~~~~~~
 
@@ -665,7 +665,7 @@ KEYSTREAM_2 (CBOR Sequence) (1 byte)
 EC
 ~~~~~~~~~~~~
 
-The Responder calculates CIPHERTEXT_2B as XOR between PLAINTEXT_2B and KEYSTREAM_2:
+The Responder calculates CIPHERTEXT_2B as XOR between PLAINTEXT_2A and KEYSTREAM_2:
 
 ~~~~~~~~~~~~
 CIPHERTEXT_2B (CBOR Sequence) (1 byte)
@@ -704,7 +704,7 @@ AC 65 1D A0 57 9A 08 C7 86 50 2A 66
 
 The transcript hash TH_3 is calculated using the EDHOC hash algorithm:
 
-TH_3 = H( TH_2, PLAINTEXT_2 )
+TH_3 = H( TH_2, PLAINTEXT_2A )
 
 ~~~~~~~~~~~~
 TH_3 (CBOR Data Item) (32 bytes)
