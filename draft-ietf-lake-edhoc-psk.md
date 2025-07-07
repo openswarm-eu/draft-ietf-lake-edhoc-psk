@@ -82,11 +82,9 @@ This document defines a Pre-Shared Key (PSK) authentication method for the Ephem
 
 EDHOC with PSK authentication benefits use cases where two nodes share a Pre-Shared Key (PSK) provided out-of-band (external PSK). This applies to scenarios like the Authenticated Key Management Architecture (AKMA) in mobile systems or the Peer and Authenticator in Extensible Authentication Protocol (EAP) systems. The PSK method enables the nodes to perform ephemeral key exchange, achieving Perfect Forward Secrecy (PFS). This ensures that even if the PSK is compromised, past communications remain secure against active attackers, while future communications are protected from passive attackers. Additionally, by leveraging the PSK for both authentication and key derivation, the method offers quantum resistance key exchange and authentication even when used with ECDHE.
 
-Another key use case of PSK authentication in the EDHOC protocol is session resumption. This enables previously connected parties to quickly reestablish secure communication using pre-shared keys from a prior session, reducing the overhead associated with key exchange and asymmetric authentication. By using PSK authentication, EDHOC allows session keys to be refreshed with significantly lower computational overhead compared to public-key authentication. In this case, the PSK (resumption PSK) is provisioned after the establishment of a previous EDHOC session by using EDHOC_Exporter (resumption PSK).
+Another key use case of PSK authentication in the EDHOC protocol is session resumption. This enables previously connected parties to quickly reestablish secure communication using pre-shared keys from a prior session, reducing the overhead associated with key exchange and asymmetric authentication. By using PSK authentication, EDHOC allows session keys to be refreshed with significantly lower computational overhead compared to public-key authentication. In this case, the PSK (resumption PSK) is provisioned after the establishment of a previous EDHOC session by using EDHOC_Exporter (resumption PSK). Therefore, the external PSK is supposed to be a long-term credential while the resumption PSK is a session key.
 
-Therefore, the external PSK is supposed to be a long-term credential while the resumption PSK is a session key.
-
-Section 3 provides an overview of the PSK method flow and credentials. Section 4 outlines the changes to key derivation compared to {{RFC9528}}. Section 5 details message formatting and processing, and Section 6 discusses security considerations. How to derive keys for resumption is described in Section 7.
+Section 3 provides an overview of the PSK method flow and credentials. Section 4 outlines the changes to key derivation compared to {{RFC9528}}. Section 5 details message formatting and processing, and Section 6 describes the usage of PSK for resumption. Section 7 defines the use of EDHOC-PSK with OSCORE. Security considerations are described in Section 8, and Section 9 outlines the IANA considerations.
 
 # Conventions and Definitions
 
@@ -232,7 +230,6 @@ where:
 - plaintext_length_2a is the length of PLAINTEXT_2A in message_2.
 - plaintext_length_3a is the length of PLAINTEXT_3A in message_3.
 
-
 Additionally, the definition of the transcript hash TH_4 is modified as:
 
 - TH_4 = H( TH_3, ID_CRED_PSK, PLAINTEXT_3B, CRED_PSK )
@@ -285,7 +282,7 @@ Message 3 is formatted as specified in {{Section 5.4.1 of RFC9528}}.
 
       * If the length of PLAINTEXT_3A exceeds the output of EDHOC_KDF, then {{Appendix G of RFC9528}} applies.
 
-   * Compute KEYSTREAM_3 as in {{key-der}}, where plaintext_length_3a is the length of PLAINTEXT_3A.
+   * Compute KEYSTREAM_3A as in {{key-der}}, where plaintext_length_3a is the length of PLAINTEXT_3A.
 
    * CIPHERTEXT_3A = PLAINTEXT_3A XOR KEYSTREAM_3A
 
