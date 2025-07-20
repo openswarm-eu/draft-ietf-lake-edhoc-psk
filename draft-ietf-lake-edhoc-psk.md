@@ -150,7 +150,7 @@ The following guidelines apply to the encoding and handling of CRED_PSK and ID_C
 
 - If CRED_PSK is provisioned out-of-band and transported by value, it SHOULD be used as-is without re-encoding. Re-encoding might cause mismatches when comparing identifiers such as hash values or 'kid' references.
 
-- ID_CRED_PSK SHOULD uniquely identify the correspoding CRED_PSK to avoid ambiguity. In cases where ID_CRED_PSK is a reference to a key identifier, care must be taken to ensure that 'kid' is globally unique for the PSK.
+- ID_CRED_PSK SHOULD uniquely identify the corresponding CRED_PSK to avoid ambiguity. In cases where ID_CRED_PSK is a reference to a key identifier, care must be taken to ensure that 'kid' is globally unique for the PSK.
 
 - When ID_CRED_PSK consists solely of a 'kid' parameter (i.e., { 4 : kid }), the compact encoding optimization defined in {{Section 3.5.3.2 of RFC9528}} MUST be applied in plaintext fields (such as PLAINTEXT_3A). For example:
   - { 4 : h'0f' } encoded as h'0f' (CBOR byte string)
@@ -318,7 +318,7 @@ Upon receiving message_3, the Responder performs the following steps:
   - protected = h''
   - AEAD algorithm from cipher suite
 
-If verification fails, this indicates either the Initiator does not know the correct PSK, or the message was tampered with. Contrary, if verification succeeds, the Responder conlcudes that the Initiator knows the correct PSK, has correctly derived the transcript hash TH_3 and is actively participating in the protocol.
+If verification fails, this indicates either the Initiator does not know the correct PSK, or the message was tampered with. Contrary, if verification succeeds, the Responder concludes that the Initiator knows the correct PSK, has correctly derived the transcript hash TH_3 and is actively participating in the protocol.
 
 Lastly, the Responder computes TH_4 as defined in {{key-der}}
 
@@ -382,7 +382,7 @@ When using resumption PSKs:
 
 # EDHOC PSK and OSCORE
 
-When PSK authenitcation is used and the Initiator is able to derive PRK_out before sending message_3, then the optimization described in {{Section 3 of RFC9668}} applies. In this scenario, the Initiator MAY concatenate EDHOC message_3 and the first OSCORE request in a single CoAP message.
+When PSK authentication is used and the Initiator is able to derive PRK_out before sending message_3, then the optimization described in {{Section 3 of RFC9668}} applies. In this scenario, the Initiator MAY concatenate EDHOC message_3 and the first OSCORE request in a single CoAP message.
 
 
 # Security Considerations
